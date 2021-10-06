@@ -8,6 +8,7 @@ import {
   ListItemAvatar,
   Avatar,
   Grid,
+  IconButton,
 } from '@mui/material';
 import {
   PowerSettingsNewRounded as PowerSettingsNewRoundedIcon,
@@ -67,7 +68,9 @@ export const DeviceStrages: React.FC = () => {
                     invisible={isEmpty}
                   >
                     <Avatar sx={{ width: 34, height: 34 }}>
-                      <PowerSettingsNewRoundedIcon />
+                      <IconButton color='inherit'>
+                        <PowerSettingsNewRoundedIcon />
+                      </IconButton>
                     </Avatar>
                   </PowerOnBadge>
                 </ListItemAvatar>
@@ -77,7 +80,8 @@ export const DeviceStrages: React.FC = () => {
                   sx={{
                     border: 1,
                     maxWidth: 270,
-                    padding: '4px',
+                    paddingX: '4px',
+                    paddingY: isEmpty ? '14.01px' : '4px',
                     bgcolor: 'common.white',
                     ...(isMounted && {borderColor: 'primary.light'}),
                     ...(isEmpty && {color: 'text.disabled'})
