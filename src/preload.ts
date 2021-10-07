@@ -29,6 +29,11 @@ export class ContextBridgeApi {
       }
     );
   };
+
+  // <= window.api.removeOnSendToRenderer() でMainプロセスから受信するリスナーを削除する
+  public removeOnSendToRenderer = () => {
+    ipcRenderer.removeAllListeners(IpcChannelType.TO_RENDERER);
+  };
 }
 
 

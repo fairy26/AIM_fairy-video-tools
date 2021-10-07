@@ -24,6 +24,8 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
     api.onSendToRenderer(callback);
 
     send('--check');
+    
+    return api.removeOnSendToRenderer;
   }, []);
   
   const [ message, setMessage ] = useState<string[]>([]);
@@ -33,15 +35,11 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
   const [readOnlyFlags, setReadOnlyFlags] = useState<boolean[]>(Array(10).fill(true));
 
   const handleReadOnly = (index: number) => (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newReadOnlyFlags: boolean[] = [...readOnlyFlags];
-    newReadOnlyFlags.splice(index, 1, event.target.checked);
-    setReadOnlyFlags(newReadOnlyFlags);
+    setReadOnlyFlags((prev) => [...prev.map((element, i) => (i === index) ? event.target.checked : element)])
   };
 
   const updateOneMountPoint = (mountPoint: string): void => {
-    const newMountPoints: string[] = [...mountPoints];
-    newMountPoints.splice(index, 1, mountPoint);
-    setMountPoints(newMountPoints);
+    setMountPoints((prev) => [...prev.map((element, i) => (i === index) ? mountPoint : element)])
   };
 
   const callback = useCallback((args: string[]): void =>{

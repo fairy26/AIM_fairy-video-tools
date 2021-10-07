@@ -1,22 +1,42 @@
 import React from 'react';
 
 import {
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    ListSubheader} from '@mui/material';
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 import {
-  Assignment as AssignmentIcon,
   AllInboxRounded as AllInboxRoundedIcon,
+  CopyAll as CopyAllIcon,
 } from '@mui/icons-material/';
 
-export const mainListItems = ( 
-  <div>
-    <ListItem button>
-      <ListItemIcon>
-        <AllInboxRoundedIcon />
-      </ListItemIcon>
-      <ListItemText primary="Device Strages" />
-    </ListItem>
-  </div>
-);
+import { useModeFunctions } from './ModeProvider';
+
+export const DrawerListItems: React.VFC = () => {
+
+  const { modeIs, handleMode } = useModeFunctions();
+
+  return ( 
+    <List>
+      <ListItemButton
+        selected={modeIs.device_strages}
+        onClick={handleMode('device_strages')}
+      >
+        <ListItemIcon>
+          <AllInboxRoundedIcon />
+        </ListItemIcon>
+        <ListItemText primary="Device Strages" />
+      </ListItemButton>
+      <ListItemButton
+        selected={modeIs.disk_copy}
+        onClick={handleMode('disk_copy')}
+      >
+        <ListItemIcon>
+          <CopyAllIcon />
+        </ListItemIcon>
+        <ListItemText primary="Disk Copy" />
+      </ListItemButton>
+    </List>
+  );
+}

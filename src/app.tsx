@@ -18,9 +18,10 @@ import {
   ChevronLeft as ChevronLeftIcon,
 } from '@mui/icons-material/'
 
+import { ModeProvider } from './components/ModeProvider';
+import { DrawerListItems } from './components/DrawerListItems';
+import { MainComponent } from './components/MainComponent';
 import { DeviceStragesProvider } from './components/DeviceStragesProvider';
-import { mainListItems } from './components/DrawerListItems';
-import { DeviceStrages } from './components/DeviceStrages';
 
 const drawerWidth = 240;
 
@@ -84,6 +85,7 @@ export default function DashboardContent() {
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
+
         <AppBar position="absolute" open={open}>
           <Toolbar
             sx={{
@@ -113,41 +115,46 @@ export default function DashboardContent() {
             </Typography>
           </Toolbar>
         </AppBar>
-        <Drawer variant="permanent" open={open}>
-          <Toolbar
+
+        <ModeProvider>
+          <Drawer variant="permanent" open={open}>
+            <Toolbar
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                px: [1],
+              }}
+            >
+              <IconButton onClick={toggleDrawer}>
+                <ChevronLeftIcon />
+              </IconButton>
+            </Toolbar>
+            <Divider />
+            <DrawerListItems />
+          </Drawer>
+
+          <Box
+            component="main"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              px: [1],
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'light'
+                  ? theme.palette.grey[100]
+                  : theme.palette.grey[900],
+              flexGrow: 1,
+              height: '100vh',
+              overflow: 'auto',
             }}
           >
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Toolbar>
-          <Divider />
-          <List>{mainListItems}</List>
-        </Drawer>
-        <Box
-          component="main"
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-            flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
-          }}
-        >
-          <Toolbar />
-            <Paper sx={{ margin: 4, padding: 2, display: 'flex', flexDirection: 'column' }}>
+            <Toolbar />
+            <Paper sx={{ margin: 2, padding: 2, display: 'flex', flexDirection: 'column' }}>
               <DeviceStragesProvider>
-                <DeviceStrages />
+                <MainComponent/>
               </DeviceStragesProvider>
             </Paper>
-        </Box>
+          </Box>
+        </ModeProvider>
+
       </Box>
     </ThemeProvider>
   );

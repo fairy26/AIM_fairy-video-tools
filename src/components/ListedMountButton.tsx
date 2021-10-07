@@ -22,9 +22,10 @@ export const ListedMountButton: React.VFC<Props> = ({isMounted, index}) => {
       ? null
       : <Switch
           id={index.toString()}
+          title={readOnlyFlags[index] ? 'Read Only' : 'Read-write'}
           checked={readOnlyFlags[index]}
           onChange={handleReadOnly(index)}
-          inputProps={{ 'aria-label': 'controlled' }}
+          inputProps={{ 'aria-label': 'Read Only' }}
         />}
       <Button
         variant="outlined"
