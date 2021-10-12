@@ -33,6 +33,7 @@ PORT = {
 def get_hdd_lists():
   disks = ['empty'] * 10
   mountpoints = disks[:]
+  accesses = disks[:]
 
   connected_ports = _get_connected_portlist()
 
@@ -47,9 +48,9 @@ def get_hdd_lists():
         else:
           disks[index] = os.path.realpath(sym_path)
 
-        mountpoints[index] = _get_mountpoint(disks[index])
-  
-  return disks, mountpoints
+        mountpoints[index], accesses[index] = _get_mountpoint_access(disks[index])
+
+  return disks, mountpoints, accesses
 
 
 def _get_connected_portlist():
@@ -63,18 +64,22 @@ def _get_connected_portlist():
   return connected_ports
 
 
-def _get_mountpoint(target: str=None) -> list:
+def _get_mountpoint_access(target: str=None) -> list:
   mounted = False
+  access = 'rw'
   with open('/proc/mounts', 'r', encoding='utf-8') as f:
     for raw in f.readlines():
       out = raw.split(' ')
       device_name = out[0]
       mountpoint = out[1]
+      details = out[3]
       if target == device_name:
         mounted = True
         target = mountpoint
-  
+        if 'ro' in details:
+          access = 'ro'
+
   if mounted:
-    return target
+    return target, access
   else:
-    return 'not_mounted'
+    return 'not_mounted', 'not_mounted'

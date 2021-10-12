@@ -41,6 +41,7 @@ if __name__ == '__main__':
   if args.check:
     send('check')
 
-    hdd_list, mounted_list = get_hdd_lists()
+    hdd_list, mounted_list, access_list = get_hdd_lists()
     send(hdd_list)
     send(mounted_list)
+    send(access_list)

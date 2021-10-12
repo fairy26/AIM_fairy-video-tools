@@ -56,9 +56,11 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
         const strArgs = results.map(element => removeSingleQuote(element));
         const newDisks = strToArray(strArgs[0]);
         const newMountPoints = strToArray(strArgs[1]);
+        const newReadOnlyFlags = strToArray(strArgs[2]).map(access => access==='ro');
 
         setDisks(newDisks);
         setMountPoints(newMountPoints);
+        setReadOnlyFlags(newReadOnlyFlags);
         break;
 
       case 'mount':
