@@ -76,7 +76,7 @@ def _get_mountpoint_access(target: str=None) -> list:
       if target == device_name:
         mounted = True
         target = mountpoint
-        if 'ro' in details:
+        if details.startswith('ro'):
           access = 'ro'
 
   if mounted:
