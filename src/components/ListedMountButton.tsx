@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, Switch } from "@mui/material";
+import { Button, Checkbox, FormControlLabel, Switch } from "@mui/material";
 import {
   PlayCircle as PlayCircleIcon,
   StopCircle as StopCircleIcon,
@@ -18,13 +18,16 @@ export const ListedMountButton: React.VFC<Props> = ({isMounted, index}) => {
 
   return(
     <>
-      <Switch
+      <FormControlLabel
         id={index.toString()}
-        title={readOnlyFlags[index] ? 'Read Only' : 'Read-write'}
-        checked={readOnlyFlags[index]}
-        disabled={isMounted}
-        onChange={handleReadOnly(index)}
-        inputProps={{ 'aria-label': 'Read Only' }}
+        label={readOnlyFlags[index] ? 'ro' : 'rw'}
+        control={
+          <Checkbox
+            checked={readOnlyFlags[index]}
+            disabled={isMounted}
+            onChange={handleReadOnly(index)}
+            inputProps={{ 'aria-label': 'Read Only' }}
+          />}
       />
       <Button
         variant="outlined"
