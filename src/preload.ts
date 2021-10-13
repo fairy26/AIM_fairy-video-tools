@@ -30,9 +30,22 @@ export class ContextBridgeApi {
     );
   };
 
-  // <= window.api.removeOnSendToRenderer() でMainプロセスから受信するリスナーを削除する
-  public removeOnSendToRenderer = () => {
+  // <= window.api.onSendToRendererInRealTime(callback) でMainプロセス(python-shell)からリアルタイムに受信する
+  public onSendToRendererInRealTime = (
+    rendererListener: (message: string) => void
+  ) => {
+    ipcRenderer.on(
+      IpcChannelType.TO_RENDERER_IN_RT,
+      (event: IpcRendererEvent, args: string) => {
+        rendererListener(args);
+      }
+    );
+  };
+
+  // <= Mainプロセスから受信するリスナーを削除する
+  public removeOnSendToRenderers = () => {
     ipcRenderer.removeAllListeners(IpcChannelType.TO_RENDERER);
+    ipcRenderer.removeAllListeners(IpcChannelType.TO_RENDERER_IN_RT);
   };
 }
 

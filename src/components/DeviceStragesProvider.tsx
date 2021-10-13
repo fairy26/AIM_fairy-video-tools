@@ -22,12 +22,13 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
     console.log('R: only one after initial render');
 
     api.onSendToRenderer(callback);
+    api.onSendToRendererInRealTime(getProgress);
 
     send('--check');
-    
-    return api.removeOnSendToRenderer;
+
+    return api.removeOnSendToRenderers;
   }, []);
-  
+
   const [ message, setMessage ] = useState<string[]>([]);
   const [ disks, setDisks] = useState<string[]>(Array(10).fill('empty'));
   const [ mountPoints, setMountPoints] = useState<string[]>(Array(10).fill('empty'));
@@ -46,7 +47,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
     console.log('R: onSendToRenderer ', args);
     setMessage(args);
   }, []);
-  
+
   useEffect(() => {
     const prefix: string = message[0];
     const results: string[] = message.slice(1);
@@ -67,7 +68,11 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
       case 'unmount':
         updateOneMountPoint(results[0]);
         break;
-        
+
+      case 'copy':
+        // console.log(results);
+        break;
+
       default:
         console.log('python-shell send unexpected messages');
         break;
@@ -76,7 +81,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
 
   const handleMount = (newIndex: number) => (): void => {
     console.log('R: clicked, change mount states' + newIndex);
-    
+
     index = newIndex;
     mounted[index]
     ? send(`--unmount --path ${mountPoints[index]}`)
@@ -91,6 +96,52 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
     send('--check');
   }, []);
 
+  const [progress, setProgress] = useState<number>(0);
+
+  const updateProgress = (arg:string) => {
+    const newRemaining = arg.match(/(\d+:)+\d*/g);
+    if (newRemaining != null){
+      setRemaining(newRemaining[1]);
+      setProgress(parseInt(arg, 10));
+    }
+  }
+
+  const [remaining, setRemaining] = useState<string>('00:00');
+
+  const getProgress = useCallback((arg: string): void =>{
+    // console.log('R: progress ', arg);
+    // console.log('R: progress ', parseInt(arg, 10));
+    arg === 'finished'
+    ? progressOff()
+    : updateProgress(arg);
+  }, []);
+
+  const [showProgress, setShowProgress] = useState<boolean>(false);
+
+  const progressOn = useCallback((): void => {
+    setShowProgress(true);
+  }, []);
+  
+  const progressOff = useCallback((): void => {
+    setShowProgress(false);
+    setProgress(0);
+    setRemaining('00:00');
+  }, []);
+
+  const copyDisk = useCallback((): void => {
+    console.log('R: clicked, check hdd list');
+
+    send('--copy');
+    progressOn();
+  }, []);
+
+  const killBySIGINT = useCallback(():void => {
+    console.log('R: clicked, raise keyboard interrupt');
+
+    send('SIGINT');
+    progressOff();
+  }, []);
+
   return (
     <DeviceStragesCtx.Provider
       value={{
@@ -100,7 +151,13 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
         handleMount,
         getDisksList,
         readOnlyFlags,
-        handleReadOnly
+        handleReadOnly,
+        copyDisk,
+        message,
+        progress,
+        showProgress,
+        remaining,
+        killBySIGINT,
       }}
     >
       { children }

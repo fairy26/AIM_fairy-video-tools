@@ -1,5 +1,6 @@
 import React from 'react';
 import { DeviceStrages } from './DeviceStrages';
+import { DiskCopy } from './DiskCopy';
 
 import { useModeFunctions } from './ModeProvider';
 
@@ -15,8 +16,7 @@ export const MainComponent = () => {
       )
     case 'disk_copy':
       return (
-        <>
-        </>
+        <DiskCopy />
       )
   }
 }

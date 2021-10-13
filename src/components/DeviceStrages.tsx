@@ -20,7 +20,6 @@ import { PowerOnBadge } from './PowerOnBadge';
 import { ListedMountButton } from './ListedMountButton';
 
 
-
 export const DeviceStrages: React.FC = () => {
   const { disks, mounted, mountPoints } = useDeviceStragesFunctions();
 
@@ -40,7 +39,7 @@ export const DeviceStrages: React.FC = () => {
         <Grid item xs={4}>
           <ReloadDisksButton />
         </Grid>
-       
+
         <Grid item xs={12}>
           <List
             sx={{
@@ -53,7 +52,7 @@ export const DeviceStrages: React.FC = () => {
           { disks.map((disk: string, index: number) => {
             const isEmpty: boolean = disk === 'empty';
             const isMounted: boolean = mounted[index];
-            
+
             return (
               <ListItem
                 key={index}
@@ -93,8 +92,6 @@ export const DeviceStrages: React.FC = () => {
           </List>
         </Grid>
       </Grid>
-      
-      {/* <OutputFromPython /> */}
     </>
   );
 };
