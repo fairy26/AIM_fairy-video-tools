@@ -73,7 +73,6 @@ const createWindow = (): void => {
           })
           .end((err, code, signal) => {
             if (err) throw err;
-            console.log(`results: ${output}`);
             mainWindow.webContents.send(IpcChannelType.TO_RENDERER, output);
             mainWindow.webContents.send(
               IpcChannelType.TO_RENDERER_IN_RT,

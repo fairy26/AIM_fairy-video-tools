@@ -96,27 +96,9 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
     send('--check');
   }, []);
 
-  const [progress, setProgress] = useState<number>(0);
-
-  const updateProgress = (arg:string) => {
-    const newRemaining = arg.match(/(\d+:)+\d*/g);
-    if (newRemaining != null){
-      setRemaining(newRemaining[1]);
-      setProgress(parseInt(arg, 10));
-    }
-  }
-
-  const [remaining, setRemaining] = useState<string>('00:00');
-
-  const getProgress = useCallback((arg: string): void =>{
-    // console.log('R: progress ', arg);
-    // console.log('R: progress ', parseInt(arg, 10));
-    arg === 'finished'
-    ? progressOff()
-    : updateProgress(arg);
-  }, []);
-
   const [showProgress, setShowProgress] = useState<boolean>(false);
+  const [percentage, setPercentage] = useState<number>(0);
+  const [remaining, setRemaining] = useState<string>('-');
 
   const progressOn = useCallback((): void => {
     setShowProgress(true);
@@ -124,9 +106,25 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
   
   const progressOff = useCallback((): void => {
     setShowProgress(false);
-    setProgress(0);
-    setRemaining('00:00');
+    setPercentage(0);
+    setRemaining('-');
   }, []);
+
+  const getProgress = useCallback((arg: string): void =>{
+    arg === 'finished'
+    ? progressOff()
+    : updateProgress(arg);
+  }, []);
+
+  const updateProgress = (arg:string) => {
+    const progress = arg.replace(/\r/g, '').split(',');
+
+    const newPercentage = parseInt(progress[0], 10);
+    const newRemaining = progress[1] === '?' ? '-' : `残り ${progress[1]}`
+
+    setPercentage(newPercentage);
+    setRemaining(newRemaining);
+  }
 
   const copyDisk = useCallback((): void => {
     console.log('R: clicked, check hdd list');
@@ -154,7 +152,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
         handleReadOnly,
         copyDisk,
         message,
-        progress,
+        percentage,
         showProgress,
         remaining,
         killBySIGINT,

@@ -33,7 +33,7 @@ const NotBlankAlert: React.VFC = (disk: string) => {
 }
 
 export const DiskCopy: React.FC = () => {
-  const { disks, readOnlyFlags, message, copyDisk, progress, showProgress, remaining, killBySIGINT } = useDeviceStragesFunctions();
+  const { disks, readOnlyFlags, message, copyDisk, percentage, showProgress, remaining, killBySIGINT } = useDeviceStragesFunctions();
 
   const [originalDisk, setOriginalDisk] = useState<string | null>(null)
   const handleOriginalChange = (event: React.ChangeEvent<HTMLInputElement>, newInputValue: string) => {
@@ -122,7 +122,7 @@ export const DiskCopy: React.FC = () => {
           </Grid>
 
           <Grid item xs={8}>
-            <LinearProgress variant="determinate" value={progress}/>
+            <LinearProgress variant="determinate" value={percentage}/>
           </Grid>
           <Grid item xs={2} zeroMinWidth>
             <Typography variant="body2" color="text.secondary" noWrap>
