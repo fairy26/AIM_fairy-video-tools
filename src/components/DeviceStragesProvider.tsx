@@ -1,12 +1,20 @@
-import React, { createContext, useState, useContext, useCallback, useEffect, useMemo, useReducer } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react';
 
-import { ContextBridgeApi } from "../preload";
+import { ContextBridgeApi } from '../preload';
 
 const DeviceStragesCtx = createContext(null);
 export const useDeviceStragesFunctions = () => useContext(DeviceStragesCtx);
 
 const strToArray = (str: string): string[] => str.slice(1, -1).split(', ');
-const removeSingleQuote = (str: string): string => str.replace(/'/g, "");
+const removeSingleQuote = (str: string): string => str.replace(/'/g, '');
 
 let index: number = 0;
 
@@ -17,7 +25,7 @@ const send = async (arg: string) => {
   console.log('R: sendToMainProcess ', result);
 };
 
-export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: any) => {
+export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   useEffect(() => {
     console.log('R: only one after initial render');
 
@@ -29,21 +37,28 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
     return api.removeOnSendToRenderers;
   }, []);
 
-  const [ message, setMessage ] = useState<string[]>([]);
-  const [ disks, setDisks] = useState<string[]>(Array(10).fill('empty'));
-  const [ mountPoints, setMountPoints] = useState<string[]>(Array(10).fill('empty'));
-  const mounted = useMemo<boolean[]>(() => mountPoints.map((element) => element !== 'empty' && element !== 'not_mounted'), [mountPoints]);
+  const [message, setMessage] = useState<string[]>([]);
+  const [disks, setDisks] = useState<string[]>(Array(10).fill('empty'));
+  const [mountPoints, setMountPoints] = useState<string[]>(Array(10).fill('empty'));
+  const mounted = useMemo<boolean[]>(
+    () => mountPoints.map((element) => element !== 'empty' && element !== 'not_mounted'),
+    [mountPoints]
+  );
   const [readOnlyFlags, setReadOnlyFlags] = useState<boolean[]>(Array(10).fill(true));
 
-  const handleReadOnly = (index: number) => (event: React.ChangeEvent<HTMLInputElement>): void => {
-    setReadOnlyFlags((prev) => [...prev.map((element, i) => (i === index) ? event.target.checked : element)])
-  };
+  const handleReadOnly =
+    (index: number) =>
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      setReadOnlyFlags((prev) => [
+        ...prev.map((element, i) => (i === index ? event.target.checked : element)),
+      ]);
+    };
 
   const updateOneMountPoint = (mountPoint: string): void => {
-    setMountPoints((prev) => [...prev.map((element, i) => (i === index) ? mountPoint : element)])
+    setMountPoints((prev) => [...prev.map((element, i) => (i === index ? mountPoint : element))]);
   };
 
-  const callback = useCallback((args: string[]): void =>{
+  const callback = useCallback((args: string[]): void => {
     console.log('R: onSendToRenderer ', args);
     setMessage(args);
   }, []);
@@ -54,10 +69,10 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
 
     switch (prefix) {
       case 'check':
-        const strArgs = results.map(element => removeSingleQuote(element));
+        const strArgs = results.map((element) => removeSingleQuote(element));
         const newDisks = strToArray(strArgs[0]);
         const newMountPoints = strToArray(strArgs[1]);
-        const newReadOnlyFlags = strToArray(strArgs[2]).map(access => access==='ro');
+        const newReadOnlyFlags = strToArray(strArgs[2]).map((access) => access === 'ro');
 
         setDisks(newDisks);
         setMountPoints(newMountPoints);
@@ -84,8 +99,8 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
 
     index = newIndex;
     mounted[index]
-    ? send(`--unmount --path ${mountPoints[index]}`)
-    : readOnlyFlags[index]
+      ? send(`--unmount --path ${mountPoints[index]}`)
+      : readOnlyFlags[index]
       ? send(`--mount --read-only --path ${disks[index]}`)
       : send(`--mount --path ${disks[index]}`);
   };
@@ -103,28 +118,26 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
   const progressOn = useCallback((): void => {
     setShowProgress(true);
   }, []);
-  
+
   const progressOff = useCallback((): void => {
     setShowProgress(false);
     setPercentage(0);
     setRemaining('-');
   }, []);
 
-  const getProgress = useCallback((arg: string): void =>{
-    arg === 'finished'
-    ? progressOff()
-    : updateProgress(arg);
+  const getProgress = useCallback((arg: string): void => {
+    arg === 'finished' ? progressOff() : updateProgress(arg);
   }, []);
 
-  const updateProgress = (arg:string) => {
+  const updateProgress = (arg: string) => {
     const progress = arg.replace(/\r/g, '').split(',');
 
     const newPercentage = parseInt(progress[0], 10);
-    const newRemaining = progress[1] === '?' ? '-' : `残り ${progress[1]}`
+    const newRemaining = progress[1] === '?' ? '-' : `残り ${progress[1]}`;
 
     setPercentage(newPercentage);
     setRemaining(newRemaining);
-  }
+  };
 
   const copyDisk = useCallback((): void => {
     console.log('R: clicked, check hdd list');
@@ -133,7 +146,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
     progressOn();
   }, []);
 
-  const killBySIGINT = useCallback(():void => {
+  const killBySIGINT = useCallback((): void => {
     console.log('R: clicked, raise keyboard interrupt');
 
     send('SIGINT');
@@ -158,7 +171,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode>  = ({ children }: 
         killBySIGINT,
       }}
     >
-      { children }
+      {children}
     </DeviceStragesCtx.Provider>
   );
 };

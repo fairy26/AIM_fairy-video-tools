@@ -1,19 +1,19 @@
-import React from 'react';
+import React from "react";
 
-import { Button } from '@mui/material';
-import { Cached as CashedIcon } from '@mui/icons-material';
+import { Button } from "@mui/material";
+import { Cached as CashedIcon } from "@mui/icons-material";
 
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useDeviceStragesFunctions } from "./DeviceStragesProvider";
 
 export const ReloadDisksButton = () => {
   const { getDisksList } = useDeviceStragesFunctions();
   return (
-      <Button
-        variant='outlined'
-        startIcon={<CashedIcon />}
-        onClick={getDisksList}
-      >
-        Reload
-      </Button>
+    <Button
+      variant="outlined"
+      startIcon={<CashedIcon />}
+      onClick={getDisksList}
+    >
+      Reload
+    </Button>
   );
 };

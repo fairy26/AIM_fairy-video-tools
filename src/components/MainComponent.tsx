@@ -7,16 +7,12 @@ import { useModeFunctions } from './ModeProvider';
 export const MainComponent = () => {
   const { modeIs } = useModeFunctions();
 
-  const mode = Object.keys(modeIs).reduce((prev, key) => modeIs[key] ? key : prev)
+  const mode = Object.keys(modeIs).reduce((prev, key) => (modeIs[key] ? key : prev));
 
-  switch(mode) {
+  switch (mode) {
     case 'device_strages':
-      return (
-        <DeviceStrages />
-      )
+      return <DeviceStrages />;
     case 'disk_copy':
-      return (
-        <DiskCopy />
-      )
+      return <DiskCopy />;
   }
-}
+};

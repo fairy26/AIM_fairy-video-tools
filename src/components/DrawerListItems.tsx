@@ -1,11 +1,6 @@
 import React from 'react';
 
-import {
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
+import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import {
   AllInboxRounded as AllInboxRoundedIcon,
   CopyAll as CopyAllIcon,
@@ -14,24 +9,17 @@ import {
 import { useModeFunctions } from './ModeProvider';
 
 export const DrawerListItems: React.VFC = () => {
-
   const { modeIs, handleMode } = useModeFunctions();
 
-  return ( 
+  return (
     <List>
-      <ListItemButton
-        selected={modeIs.device_strages}
-        onClick={handleMode('device_strages')}
-      >
+      <ListItemButton selected={modeIs.device_strages} onClick={handleMode('device_strages')}>
         <ListItemIcon>
           <AllInboxRoundedIcon />
         </ListItemIcon>
         <ListItemText primary="Device Strages" />
       </ListItemButton>
-      <ListItemButton
-        selected={modeIs.disk_copy}
-        onClick={handleMode('disk_copy')}
-      >
+      <ListItemButton selected={modeIs.disk_copy} onClick={handleMode('disk_copy')}>
         <ListItemIcon>
           <CopyAllIcon />
         </ListItemIcon>
@@ -39,4 +27,4 @@ export const DrawerListItems: React.VFC = () => {
       </ListItemButton>
     </List>
   );
-}
+};

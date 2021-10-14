@@ -12,11 +12,8 @@ import {
   Paper,
   Drawer as MuiDrawer,
 } from '@mui/material/';
-import MuiAppBar, { AppBarProps as MuiAppBarProps }  from '@mui/material/AppBar';
-import {
-  Menu as MenuIcon,
-  ChevronLeft as ChevronLeftIcon,
-} from '@mui/icons-material/'
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import { Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from '@mui/icons-material/';
 
 import { ModeProvider } from './components/ModeProvider';
 import { DrawerListItems } from './components/DrawerListItems';
@@ -29,49 +26,49 @@ interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
 }
 
-const AppBar = styled(MuiAppBar, { shouldForwardProp: (prop) => prop !== 'open',})<AppBarProps>(
-  ({ theme, open }) => ({
-    zIndex: theme.zIndex.drawer + 1,
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})<AppBarProps>(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+      duration: theme.transitions.duration.enteringScreen,
     }),
-    ...(open && {
-      marginLeft: drawerWidth,
-      width: `calc(100% - ${drawerWidth}px)`,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    }),
-  })
-);
+  }),
+}));
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      width: drawerWidth,
+const Drawer = styled(MuiDrawer, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})(({ theme, open }) => ({
+  '& .MuiDrawer-paper': {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    boxSizing: 'border-box',
+    ...(!open && {
+      overflowX: 'hidden',
       transition: theme.transitions.create('width', {
         easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
+        duration: theme.transitions.duration.leavingScreen,
       }),
-      boxSizing: 'border-box',
-      ...(!open && {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-          width: theme.spacing(9),
-        },
-      }),
-    },
-  }),
-);
+      width: theme.spacing(7),
+      [theme.breakpoints.up('sm')]: {
+        width: theme.spacing(9),
+      },
+    }),
+  },
+}));
 
 const theme = createTheme();
 
@@ -104,13 +101,7 @@ export default function DashboardContent() {
             >
               <MenuIcon />
             </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{ flexGrow: 1 }}
-            >
+            <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
               AI Medical Service
             </Typography>
           </Toolbar>
@@ -138,29 +129,30 @@ export default function DashboardContent() {
             component="main"
             sx={{
               backgroundColor: (theme) =>
-                theme.palette.mode === 'light'
-                  ? theme.palette.grey[100]
-                  : theme.palette.grey[900],
+                theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
               flexGrow: 1,
               height: '100vh',
               overflow: 'auto',
             }}
           >
             <Toolbar />
-            <Paper sx={{ margin: 2, padding: 2, display: 'flex', flexDirection: 'column' }}>
+            <Paper
+              sx={{
+                margin: 2,
+                padding: 2,
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
               <DeviceStragesProvider>
-                <MainComponent/>
+                <MainComponent />
               </DeviceStragesProvider>
             </Paper>
           </Box>
         </ModeProvider>
-
       </Box>
     </ThemeProvider>
   );
 }
 
-ReactDOM.render(
-  <DashboardContent />,
-  document.querySelector('#app')
-);
+ReactDOM.render(<DashboardContent />, document.querySelector('#app'));
