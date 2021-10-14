@@ -13,7 +13,11 @@ import {
 } from '@mui/material';
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
 
-const NotBlankAlert: React.VFC = (disk: string) => {
+type Props = {
+  disk: string;
+};
+
+const NotBlankAlert: React.VFC<Props> = ({ disk }) => {
   const [alertOpen, setAlertOpen] = useState<boolean>(false);
 
   const handleAlertClose = () => {
@@ -39,47 +43,19 @@ const NotBlankAlert: React.VFC = (disk: string) => {
 
 export const DiskCopy: React.FC = () => {
   const {
-    disks,
-    readOnlyFlags,
     message,
-    copyDisk,
     percentage,
     showProgress,
     remaining,
     killBySIGINT,
+    source,
+    sources,
+    handleSourceChange,
+    destination,
+    destinations,
+    handleDestinationChange,
+    handleCopy,
   } = useDeviceStragesFunctions();
-
-  const [originalDisk, setOriginalDisk] = useState<string | null>(null);
-  const handleOriginalChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    newInputValue: string
-  ) => {
-    setOriginalDisk(newInputValue);
-  };
-
-  const [targetDisk, setTargetDisk] = useState<string | null>(null);
-  const handleTargetChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    newInputValue: string
-  ) => {
-    setTargetDisk(newInputValue);
-  };
-
-  const handleCopy = () => {
-    setOriginalDisk(null);
-    setTargetDisk(null);
-    copyDisk();
-  };
-
-  const disksWithPosition = disks.map((name: string, index: number) =>
-    name !== 'empty' ? `Disk${index + 1} (${name})` : name
-  );
-  const originalDisks = disksWithPosition.filter(
-    (_: string, index: number) => readOnlyFlags[index]
-  );
-  const targetDisks = disksWithPosition.filter(
-    (name: string, index: number) => !readOnlyFlags[index] && name !== 'empty'
-  );
 
   return (
     <>
@@ -94,10 +70,10 @@ export const DiskCopy: React.FC = () => {
           <Autocomplete
             disablePortal
             id="original"
-            value={originalDisk}
-            onChange={handleOriginalChange}
-            options={originalDisks}
-            getOptionDisabled={(option) => option === 'empty' || option === targetDisk}
+            value={source}
+            onChange={handleSourceChange}
+            options={sources}
+            getOptionDisabled={(option) => option === 'empty' || option === destination}
             renderInput={(params) => <TextField {...params} label="コピー元" />}
           />
         </Grid>
@@ -106,10 +82,10 @@ export const DiskCopy: React.FC = () => {
           <Autocomplete
             disablePortal
             id="target"
-            value={targetDisk}
-            onChange={handleTargetChange}
-            options={targetDisks}
-            getOptionDisabled={(option) => option === 'empty' || option === originalDisk}
+            value={destination}
+            onChange={handleDestinationChange}
+            options={destinations}
+            getOptionDisabled={(option) => option === 'empty' || option === source}
             renderInput={(params) => <TextField {...params} label="コピー先" />}
           />
         </Grid>
@@ -117,8 +93,8 @@ export const DiskCopy: React.FC = () => {
         <Grid item xs={12}>
           <Button
             variant="outlined"
-            onClick={handleCopy}
-            disabled={originalDisk == null || targetDisk == null}
+            onClick={handleCopy(source, destination)}
+            disabled={source == null || destination == null}
           >
             実行
           </Button>
@@ -144,7 +120,7 @@ export const DiskCopy: React.FC = () => {
         )}
       </Grid>
 
-      {NotBlankAlert('/sda/hoge')}
+      <NotBlankAlert disk={'/sda/hoge'} />
 
       {/* python からの出力を表示する Paper */}
       <Paper

@@ -111,6 +111,29 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     send('--check');
   }, []);
 
+  // --------------------------------------------------------------
+
+  const [source, setSource] = useState<string | null>(null);
+  const handleSourceChange = (event: React.ChangeEvent<HTMLInputElement>, newValue: string) => {
+    setSource(newValue);
+  };
+
+  const [destination, setDestination] = useState<string | null>(null);
+  const handleDestinationChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    newValue: string
+  ) => {
+    setDestination(newValue);
+  };
+
+  const sources = disks.filter(
+    (name: string, index: number) =>
+      name !== 'empty' && readOnlyFlags[index] && name !== destination
+  );
+  const destinations = disks.filter(
+    (name: string, index: number) => name !== 'empty' && !readOnlyFlags[index] && name !== source
+  );
+
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [percentage, setPercentage] = useState<number>(0);
   const [remaining, setRemaining] = useState<string>('-');
@@ -139,12 +162,17 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     setRemaining(newRemaining);
   };
 
-  const copyDisk = useCallback((): void => {
-    console.log('R: clicked, check hdd list');
+  const handleCopy = useCallback(
+    (src: string, dst: string) => (): void => {
+      console.log('R: clicked, check hdd list');
 
-    send('--copy');
-    progressOn();
-  }, []);
+      send(`--copy --path ${src} ${dst}`);
+      progressOn();
+      setSource(null);
+      setDestination(null);
+    },
+    []
+  );
 
   const killBySIGINT = useCallback((): void => {
     console.log('R: clicked, raise keyboard interrupt');
@@ -163,12 +191,18 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         getDisksList,
         readOnlyFlags,
         handleReadOnly,
-        copyDisk,
         message,
         percentage,
         showProgress,
         remaining,
         killBySIGINT,
+        source,
+        sources,
+        handleSourceChange,
+        destination,
+        destinations,
+        handleDestinationChange,
+        handleCopy,
       }}
     >
       {children}
