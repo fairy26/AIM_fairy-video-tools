@@ -6,8 +6,9 @@ import {
   Button,
   Grid,
   LinearProgress,
-  Paper,
+  // Paper,
   Snackbar,
+  TextareaAutosize,
   TextField,
   Typography,
 } from '@mui/material';
@@ -43,7 +44,6 @@ const NotBlankAlert: React.VFC<Props> = ({ disk }) => {
 
 export const DiskCopy: React.FC = () => {
   const {
-    message,
     percentage,
     showProgress,
     remaining,
@@ -55,7 +55,15 @@ export const DiskCopy: React.FC = () => {
     destinations,
     handleDestinationChange,
     handleCopy,
+    logg,
   } = useDeviceStragesFunctions();
+
+  const scrollRef = React.useRef(null);
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logg]);
 
   return (
     <>
@@ -123,16 +131,20 @@ export const DiskCopy: React.FC = () => {
       <NotBlankAlert disk={'/sda/hoge'} />
 
       {/* python からの出力を表示する Paper */}
-      <Paper
+      {/* <Paper
         elevation={3}
         sx={{
           width: '100',
           marginTop: 5,
           padding: 3,
+          // maxHeight: '300px',
+          // overflowX: 'hidden',
+          // overflowY: 'scroll',
         }}
       >
-        {message}
-      </Paper>
+        {logg}
+      </Paper> */}
+      <TextareaAutosize ref={scrollRef} maxRows={20} value={logg} disabled />
     </>
   );
 };

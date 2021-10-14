@@ -126,12 +126,13 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     setDestination(newValue);
   };
 
-  const sources = disks.filter(
+  const sources = mountPoints.filter(
     (name: string, index: number) =>
-      name !== 'empty' && readOnlyFlags[index] && name !== destination
+      name !== 'not_mounted' && name !== 'empty' && readOnlyFlags[index] && name !== destination
   );
-  const destinations = disks.filter(
-    (name: string, index: number) => name !== 'empty' && !readOnlyFlags[index] && name !== source
+  const destinations = mountPoints.filter(
+    (name: string, index: number) =>
+      name !== 'not_mounted' && name !== 'empty' && !readOnlyFlags[index] && name !== source
   );
 
   const [showProgress, setShowProgress] = useState<boolean>(false);
@@ -146,27 +147,34 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     setShowProgress(false);
     setPercentage(0);
     setRemaining('-');
+    setLogg('');
   }, []);
 
   const getProgress = useCallback((arg: string): void => {
     arg === 'finished' ? progressOff() : updateProgress(arg);
   }, []);
 
+  const [logg, setLogg] = useState<string>('');
+
   const updateProgress = (arg: string) => {
-    const progress = arg.replace(/\r/g, '').split(',');
+    if (arg.startsWith('copy')) {
+      setLogg((prev) => `${prev}${arg}\n`);
+    } else {
+      const progress = arg.replace(/\r/g, '').split(',');
 
-    const newPercentage = parseInt(progress[0], 10);
-    const newRemaining = progress[1] === '?' ? '-' : `残り ${progress[1]}`;
+      const newPercentage = parseInt(progress[0], 10);
+      const newRemaining = progress[1] === '?' ? '-' : `残り ${progress[1]}`;
 
-    setPercentage(newPercentage);
-    setRemaining(newRemaining);
+      setPercentage(newPercentage);
+      setRemaining(newRemaining);
+    }
   };
 
   const handleCopy = useCallback(
-    (src: string, dst: string) => (): void => {
+    (src: string, dest: string) => (): void => {
       console.log('R: clicked, check hdd list');
 
-      send(`--copy --path ${src} ${dst}`);
+      send(`--copy --path ${src} ${dest}`);
       progressOn();
       setSource(null);
       setDestination(null);
@@ -191,7 +199,6 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         getDisksList,
         readOnlyFlags,
         handleReadOnly,
-        message,
         percentage,
         showProgress,
         remaining,
@@ -203,6 +210,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         destinations,
         handleDestinationChange,
         handleCopy,
+        logg,
       }}
     >
       {children}

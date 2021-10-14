@@ -47,8 +47,8 @@ const createWindow = (): void => {
       console.log('M: IpcChannelType.TO_MAIN ', message);
 
       const options = {
-        pythonOptions: ['-u'],
         args: message.message.split(' '),
+        pythonPath: '/home/fairy26/Documents/venv39/bin/python',
       };
 
       if (message.message === 'SIGINT') {
@@ -64,6 +64,7 @@ const createWindow = (): void => {
             output.push(message);
           })
           .on('stderr', (stderr) => {
+            console.log(stderr);
             mainWindow.webContents.send(IpcChannelType.TO_RENDERER_IN_RT, stderr);
           })
           .end((err, code, signal) => {
