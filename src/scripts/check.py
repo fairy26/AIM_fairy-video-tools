@@ -42,7 +42,7 @@ def _get_connected_portlist():
     return connected_ports
 
 
-def _get_mountpoint_access(target: str = None) -> list:
+def _get_mountpoint_access(target: str = None):
     mounted = False
     access = "rw"
     with open("/proc/mounts", "r", encoding="utf-8") as f:

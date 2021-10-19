@@ -1,4 +1,9 @@
 import argparse
+import glob
+import os
+import re
+import subprocess
+from subprocess import PIPE
 import sys
 import json
 from importlib import resources
@@ -7,12 +12,47 @@ from logging import config, getLogger
 from check import get_hdd_lists
 from mount import mount
 from unmount import unmount
-from copy import run
+from format import run as format
+from copy import run as diskcopy
 
 
 def send(message, file=sys.stdout):
     print(message, file=file)
     file.flush()
+
+
+def is_formatted(disk):
+    """check partition anf S/N labeling"""
+    is_formatted = False
+
+    cmd = ["lsblk", "-nro", "PATH,FSTYPE,LABEL"]  # $ lsblk --noheadings --raw --output PATH,FSTYPE,LABEL
+    cp = subprocess.run(cmd, stdout=PIPE, check=True)
+    details = cp.stdout.decode()
+
+    SERIAL_PTN = re.compile("_(?P<SER>(\w)+)-part1")
+    serial = None
+
+    with os.scandir("/dev/disk/by-id") as it:
+        for entry in it:
+            if entry.is_symlink():
+                entry_realpath = os.path.realpath(entry.path)
+            else:
+                continue
+
+            if disk in entry_realpath:
+                results = SERIAL_PTN.search(entry.name)
+                if results:  # if True: partition is already created
+                    serial = results["SER"]
+                    is_formatted = f"{entry_realpath} ext4 {serial}" in details  # if True: disk is labeled with S/N
+
+    return is_formatted
+
+
+def is_blank(disk):
+    """check .avi files in disk"""
+    has_avifile = glob(f"{disk}/**/*.avi", recursive=True)
+
+    return not has_avifile
 
 
 if __name__ == "__main__":
@@ -62,15 +102,27 @@ if __name__ == "__main__":
     if args.copy:
         send("copy")
 
-        run(src=args.path[0], dest=args.path[1], includes=None, excludes=None, dry_run=False, quiet=True, simplebar=True)
+        if len(args.path) != 2:
+            # TODO: inform error to app
+            sys.exit(-1)
 
-        # 以下, 簡単なpbar表示
-        # from time import sleep
-        # from tqdm import tqdm
+        src = args.path[0]
+        dest = args.path[1]
 
-        # sec = range(40)
-        # bar_format = "{percentage:.0f}, {remaining}\n"
-        # with tqdm(total=len(sec), bar_format=bar_format, leave=None) as pbar:
-        #     for i in sec:
-        #         pbar.update(1)
-        #         sleep(0.2)
+        if is_formatted(dest) and is_blank(dest):
+            pass
+        else:
+            # TODO: ask to format and get stdin from GUI
+            partition_name = format(hdd_path=dest, yes=True)
+            mountpoint = mount(disk=partition_name, ro=False)
+            dest = mountpoint
+
+        diskcopy(
+            src=src,
+            dest=dest,
+            includes=None,
+            excludes=None,
+            dry_run=False,
+            quiet=True,
+            simplebar=True,
+        )

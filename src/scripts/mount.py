@@ -3,6 +3,8 @@ import re
 import subprocess
 import sys
 
+from exitstatus import ExitStatus
+
 
 def _add_permission(cmd):
     cmd.insert(0, "sudo")
@@ -58,8 +60,15 @@ def mount(disk, ro=False):
         if ro:
             cmd.extend(["-o", "ro"])
         cmd.extend([realpath, raw_disk_mount_path])
-        subprocess.run(cmd, check=True)
-        # print(cmd)
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            if os.path.exists(raw_disk_mount_path):
+                cmd_rmdir = ["rmdir", raw_disk_mount_path]
+                if not authorized:
+                    _add_permission(cmd_rmdir)
+                subprocess.run(cmd_rmdir)
+            sys.exit(ExitStatus.failure)
 
     if not disk_is_mounted:
         # os.makedirs(disk_mount_path, exist_ok=True)
@@ -80,6 +89,14 @@ def mount(disk, ro=False):
         ]
         if not authorized:
             _add_permission(cmd)
-        subprocess.run(cmd, check=True)
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            if os.path.exists(disk_mount_path):
+                cmd_rmdir = ["rmdir", disk_mount_path]
+                if not authorized:
+                    _add_permission(cmd_rmdir)
+                subprocess.run(cmd_rmdir)
+            sys.exit(ExitStatus.failure)
 
     return disk_mount_path
