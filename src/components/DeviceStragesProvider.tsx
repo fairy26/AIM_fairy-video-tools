@@ -130,11 +130,11 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     (name: string, index: number) =>
       name !== 'not_mounted' && name !== 'empty' && readOnlyFlags[index] && name !== destination
   );
-  const destinations = mountPoints.filter(
-    (name: string, index: number) =>
-      name !== 'not_mounted' && name !== 'empty' && !readOnlyFlags[index] && name !== source
-  );
-
+  const destinations = mountPoints
+    .map((name: string, index: number) => (name === 'not_mounted' ? disks[index] : name))
+    .filter(
+      (name: string, index: number) => name !== 'empty' && !readOnlyFlags[index] && name !== source
+    );
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [percentage, setPercentage] = useState<number>(0);
   const [remaining, setRemaining] = useState<string>('-');
@@ -157,9 +157,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
   const [logg, setLogg] = useState<string>('');
 
   const updateProgress = (arg: string) => {
-    if (arg.startsWith('copy')) {
-      setLogg((prev) => `${prev}${arg}\n`);
-    } else {
+    if (/^\r\d+,\s?(\?|((\d+:)+\d+))/.test(arg)) {
       const progress = arg.replace(/\r/g, '').split(',');
 
       const newPercentage = parseInt(progress[0], 10);
@@ -167,6 +165,8 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
 
       setPercentage(newPercentage);
       setRemaining(newRemaining);
+    } else {
+      setLogg((prev) => `${prev}${arg}\n`);
     }
   };
 

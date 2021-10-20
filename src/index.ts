@@ -48,7 +48,8 @@ const createWindow = (): void => {
 
       const options = {
         args: message.message.split(' '),
-        pythonPath: '/home/fairy26/Documents/venv39/bin/python',
+        // pythonPath: '/home/fairy26/Documents/venv39/bin/python',
+        pythonPath: '/home/fairy26/ドキュメント/venv39/bin/python',
       };
 
       if (message.message === 'SIGINT') {

@@ -1,5 +1,5 @@
 import argparse
-import glob
+from glob import glob
 import os
 import re
 import subprocess
@@ -11,48 +11,15 @@ from logging import config, getLogger
 
 from check import get_hdd_lists
 from mount import mount
+from utils import get_instance, get_located_disks, update_partition
 from unmount import unmount
 from format import run as format
-from copy import run as diskcopy
+from diskcopy import run as diskcopy
 
 
 def send(message, file=sys.stdout):
     print(message, file=file)
     file.flush()
-
-
-def is_formatted(disk):
-    """check partition anf S/N labeling"""
-    is_formatted = False
-
-    cmd = ["lsblk", "-nro", "PATH,FSTYPE,LABEL"]  # $ lsblk --noheadings --raw --output PATH,FSTYPE,LABEL
-    cp = subprocess.run(cmd, stdout=PIPE, check=True)
-    details = cp.stdout.decode()
-
-    SERIAL_PTN = re.compile("_(?P<SER>(\w)+)-part1")
-    serial = None
-
-    with os.scandir("/dev/disk/by-id") as it:
-        for entry in it:
-            if entry.is_symlink():
-                entry_realpath = os.path.realpath(entry.path)
-            else:
-                continue
-
-            if disk in entry_realpath:
-                results = SERIAL_PTN.search(entry.name)
-                if results:  # if True: partition is already created
-                    serial = results["SER"]
-                    is_formatted = f"{entry_realpath} ext4 {serial}" in details  # if True: disk is labeled with S/N
-
-    return is_formatted
-
-
-def is_blank(disk):
-    """check .avi files in disk"""
-    has_avifile = glob(f"{disk}/**/*.avi", recursive=True)
-
-    return not has_avifile
 
 
 if __name__ == "__main__":
@@ -106,20 +73,23 @@ if __name__ == "__main__":
             # TODO: inform error to app
             sys.exit(-1)
 
-        src = args.path[0]
-        dest = args.path[1]
+        disks = get_located_disks()
+        src = get_instance(disks, args.path[0])
+        dest = get_instance(disks, args.path[1])
 
-        if is_formatted(dest) and is_blank(dest):
-            pass
-        else:
+        if dest.partition is None:
+            mountpoint = mount(disk=dest.path, ro=False)
+            update_partition(dest, mountpoint)
+
+        if not dest.formatted and dest.partition.isblank:
             # TODO: ask to format and get stdin from GUI
-            partition_name = format(hdd_path=dest, yes=True)
-            mountpoint = mount(disk=partition_name, ro=False)
-            dest = mountpoint
+            dest.partition.path = format(hdd_path=dest.path, yes=True)
+            mountpoint = mount(disk=dest.partition.path, ro=False)
+            update_partition(dest, mountpoint)
 
         diskcopy(
-            src=src,
-            dest=dest,
+            src=src.partition.bindedmountpoint,
+            dest=dest.partition.bindedmountpoint if dest.partition.binded else dest.partition.mountpoint,
             includes=None,
             excludes=None,
             dry_run=False,

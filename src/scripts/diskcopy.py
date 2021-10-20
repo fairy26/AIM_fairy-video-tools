@@ -82,34 +82,34 @@ def diskcopy(src, dest, includes=None, excludes=None, dry_run=True, quiet=False,
                 if dry_run:
                     logger.info(f"ffmpeg -i {src_path} -c:v zstd {dest_path}")
                 else:
-                    # command = ["-i", src_path, "-c:v", "zstd", dest_path]
-                    # f = (
-                    #     open(os.devnull, "w", encoding="utf-8") if quiet else sys.stderr
-                    # )  # pylint: disable=consider-using-with
-                    # with redirect_stderr(f):
-                    #     ret = ffpb.main(argv=command, stream=f)
-                    # if quiet:
-                    #     f.close()
+                    command = ["-i", src_path, "-c:v", "zstd", dest_path]
+                    f = (
+                        open(os.devnull, "w", encoding="utf-8") if quiet else sys.stderr
+                    )  # pylint: disable=consider-using-with
+                    with redirect_stderr(f):
+                        ret = ffpb.main(argv=command, stream=f)
+                    if quiet:
+                        f.close()
 
-                    # if ret == (signal.SIGINT + 128):  # exit on keyboard interrupt
-                    #     if dest_path.exists():
-                    #         os.remove(dest_path)
-                    #     logger.error(f"(cancel) {src_path}")
-                    #     break
-                    # if ret == 0:
-                    #     pbar.update(node.size)
-                    #     logger.info(f"(copy) {src_path}")
-                    # else:
-                    #     if dest_path.exists():
-                    #         os.remove(dest_path)
-                    #     pbar.update(node.size)
-                    #     logger.error(f"(failed) {src_path}")
-                    pbar.update(node.size)  # test
+                    if ret == (signal.SIGINT + 128):  # exit on keyboard interrupt
+                        if dest_path.exists():
+                            os.remove(dest_path)
+                        logger.error(f"(cancel) {src_path}")
+                        break
+                    if ret == 0:
+                        pbar.update(node.size)
+                        logger.info(f"(copy) {src_path}")
+                    else:
+                        if dest_path.exists():
+                            os.remove(dest_path)
+                        pbar.update(node.size)
+                        logger.error(f"(failed) {src_path}")
+                    # pbar.update(node.size)  # test
             else:
                 if dry_run:
                     logger.info(f"shutil.copy({src_path}, {dest_path})")
                 else:
-                    # shutil.copy2(src_path, dest_path)
+                    shutil.copy2(src_path, dest_path)
                     pbar.update(node.size)
                     logger.info(f"(copy) {src_path}")
 
