@@ -47,6 +47,7 @@ export const DiskCopy: React.FC = () => {
     percentage,
     showProgress,
     remaining,
+    endTime,
     killBySIGINT,
     source,
     sources,
@@ -110,25 +111,35 @@ export const DiskCopy: React.FC = () => {
 
         {showProgress && (
           <>
-            <Grid item xs={2}>
+            <Grid item xs container direction="column" spacing={0.5}>
+              {/*TODO: 実行中も元と先が表示されるようMemoを追加*/
+              /* <Grid item xs zeroMinWidth>
+              <Typography variant="body1" color="text.primary" noWrap>
+                {`コピー元: ${source} / コピー先: ${destination}`}
+              </Typography>
+            </Grid> */}
+
+              <Grid item xs>
+              <LinearProgress variant="determinate" value={percentage} />
+            </Grid>
+
+              <Grid item xs zeroMinWidth sx={{ marginLeft: 'auto' }}>
+              <Typography variant="body2" color="text.secondary" noWrap>
+                  {remaining ? `${remaining} (${endTime})` : ' '}
+              </Typography>
+            </Grid>
+            </Grid>
+
+            <Grid item xs="auto" sx={{ marginLeft: 'auto' }}>
               <Button variant="outlined" onClick={killBySIGINT} color="error">
                 中断
               </Button>
-            </Grid>
-
-            <Grid item xs={8}>
-              <LinearProgress variant="determinate" value={percentage} />
-            </Grid>
-            <Grid item xs={2} zeroMinWidth>
-              <Typography variant="body2" color="text.secondary" noWrap>
-                {remaining}
-              </Typography>
             </Grid>
           </>
         )}
       </Grid>
 
-      <NotBlankAlert disk={'/sda/hoge'} />
+      {/* <NotBlankAlert disk={'/sda/hoge'} /> */}
 
       {/* python からの出力を表示する Paper */}
       {/* <Paper

@@ -15,6 +15,7 @@ export const useDeviceStragesFunctions = () => useContext(DeviceStragesCtx);
 
 const strToArray = (str: string): string[] => str.slice(1, -1).split(', ');
 const removeSingleQuote = (str: string): string => str.replace(/'/g, '');
+const divmod = (x: number, y: number): number[] => [Math.floor(x / y), x % y];
 
 let index: number = 0;
 
@@ -137,7 +138,9 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     );
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [percentage, setPercentage] = useState<number>(0);
-  const [remaining, setRemaining] = useState<string>('-');
+  const [remaining, setRemaining] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
+  const [logg, setLogg] = useState<string>('');
 
   const progressOn = useCallback((): void => {
     setLogg('');
@@ -147,25 +150,50 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
   const progressOff = useCallback((): void => {
     setShowProgress(false);
     setPercentage(0);
-    setRemaining('-');
+    setRemaining('');
+    setEndTime('');
   }, []);
 
   const getProgress = useCallback((arg: string): void => {
     arg === 'finished' ? progressOff() : updateProgress(arg);
   }, []);
 
-  const [logg, setLogg] = useState<string>('');
+  const formatInterval = (t: number): string => {
+    const [mins, s] = divmod(t, 60);
+    const [h, m] = divmod(mins, 60);
+    const str = `${h ? `${h.toString()}:` : ''}
+      ${m.toString().padStart(2, '0')}:
+      ${s.toString().padStart(2, '0')}`;
+    return str;
+  };
+
+  const formatEndTime = (remainingTime: number): string => {
+    const date = new Date();
+    date.setSeconds(date.getSeconds() + remainingTime);
+    const str = new Intl.DateTimeFormat('ja-JP', {
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Tokyo',
+    }).format(date);
+    return str;
+  };
 
   const updateProgress = (arg: string) => {
     const message = arg.replace(/\r/g, '');
-    if (/^\d+,\s?(\?|((\d+:)+\d+))/.test(message)) {
+    if (/^\d+,\s?(\?|\d+)/.test(message)) {
       const progress = message.replace(/\s/g, '').split(',');
 
       const newPercentage = parseInt(progress[0], 10);
-      const newRemaining = progress[1] === '?' ? '-' : `残り ${progress[1]}`;
+      const newRemaining =
+        progress[1] === '?' ? '' : `残り ${formatInterval(parseInt(progress[1], 10))}`;
+      const newEndTime =
+        progress[1] === '?' ? '' : `終了予定 ${formatEndTime(parseInt(progress[1], 10))}`;
 
       setPercentage(newPercentage);
       setRemaining(newRemaining);
+      setEndTime(newEndTime);
     } else {
       setLogg((prev) => `${prev}${message}\n`);
     }
@@ -203,6 +231,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         percentage,
         showProgress,
         remaining,
+        endTime,
         killBySIGINT,
         source,
         sources,

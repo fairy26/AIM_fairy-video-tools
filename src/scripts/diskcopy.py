@@ -53,7 +53,7 @@ def diskcopy(src, dest, includes=None, excludes=None, dry_run=True, quiet=False,
             total_size += node.size
 
     if not dry_run:
-        bar_format = "{percentage:.0f}, {remaining}\n" if simplebar else None
+        bar_format = "{percentage:.0f}, {remaining_s:.0f}\n" if simplebar else None
         pbar = tqdm(total=total_size, disable=not quiet, unit_scale=True, unit="B", bar_format=bar_format)
 
     for node in PreOrderIter(dest_dirtree):
