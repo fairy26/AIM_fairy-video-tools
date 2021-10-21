@@ -31,8 +31,9 @@ def run(hdd_path, yes):
 
     cmds = [["sgdisk", "--zap-all"], ["sgdisk", "-n"], ["hdparm", "-I"], ["mkfs", "-F", "-L"]]
 
-    for cmd in cmds:
-        _add_permission(cmd)
+    if os.geteuid():
+        for cmd in cmds:
+            _add_permission(cmd)
 
     if not os.path.exists(hdd_path):
         # TODO: inform error to app

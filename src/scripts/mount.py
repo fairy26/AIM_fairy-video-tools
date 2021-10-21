@@ -11,6 +11,13 @@ def _add_permission(cmd):
 
 
 def mount(disk, ro=False):
+    """
+    $ mkdir -p /mnt/raw_sda
+    $ sudo mkdir -p /mnt/raw_sda
+    $ sudo mount /dev/sda /mnt/raw_sda
+    $ sudo mkdir -p /mnt/sda
+    $ bindfs -u [uid] -g [gid] --map=1000/[uid]:@1000/@[gid] /mnt/raw_sda /mnt/sda
+    """
     MAPPING_UID = 1000
     MAPPING_GID = 1000
     uid = gid = str(os.geteuid())
@@ -98,5 +105,3 @@ def mount(disk, ro=False):
                     _add_permission(cmd_rmdir)
                 subprocess.run(cmd_rmdir)
             sys.exit(ExitStatus.failure)
-
-    return disk_mount_path

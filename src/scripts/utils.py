@@ -3,6 +3,7 @@ import dataclasses
 from enum import Enum
 from glob import glob
 import json
+from json import decoder
 import os
 import re
 import subprocess
@@ -59,6 +60,111 @@ def lsblk_to_dict() -> List[dict]:
     return json.loads(lsblk_output)["blockdevices"]
 
 
+def proc_mounts() -> List[str]:
+    with open("/proc/mounts", "r", encoding="utf-8") as f:
+        return f.readlines()
+
+
+def check_mounts(disk: Optional[Disk]) -> Optional[Disk]:
+    if disk is None:
+        return None
+
+    for line in proc_mounts():
+        fields = line.split(" ")
+        path = fields[0]
+        mountpoint = fields[1]
+        fstype = fields[2]
+        flags = fields[3]
+        ro = flags.startswith("ro")
+
+        if disk.path in path:
+            if disk.partition is None:
+                disk.partition = Partition(path=path, mountpoint=mountpoint, mounted=True, fstype=fstype, readonly=ro)
+            else:
+                if disk.partition.path != path:
+                    continue
+                disk.partition.path = path
+                disk.partition.mountpoint = mountpoint
+                disk.partition.mounted = True
+                disk.partition.fstype = fstype
+                disk.partition.readonly = ro
+        elif (
+            disk.partition is not None and disk.partition.mountpoint is not None and disk.partition.mountpoint == path
+        ):
+            disk.partition.bindedmountpoint = mountpoint
+            disk.partition.binded = True
+
+    return disk
+
+
+def update_partition(disk: Optional[Disk], device: dict) -> bool:
+    if disk is None:
+        return False
+
+    if device["serial"] is None and disk.path in device["path"]:
+        # true: this {device} is a partition of {disk}
+        if disk.partition is None:
+            disk.partition = Partition(
+                path=device["path"],
+                mountpoint=device["mountpoint"],
+                mounted=device["mountpoint"] != None,
+                label=device["label"],
+                fstype=device["fstype"],
+            )
+
+        else:
+            if disk.partition.path != device["path"]:
+                return False
+            disk.partition.path = device["path"]
+            disk.partition.mountpoint = device["mountpoint"]
+            disk.partition.mounted = device["mountpoint"] != None
+            disk.partition.fstype = device["fstype"]
+            disk.partition.label = device["label"]
+
+        disk.formatted = (
+            disk.serial is not None and disk.serial == disk.partition.label and disk.partition.fstype == FSType.EXT4
+        )
+
+        if disk.partition.mounted:
+            disk.partition.isblank = check_blank(disk.partition.mountpoint)
+
+        return True
+    else:
+        return False
+
+
+def get_details(disks: List[Optional[Disk]]) -> List[Optional[Disk]]:
+
+    # check wether disk is formatted and is blank
+    lsblk_dict_list = lsblk_to_dict()
+
+    for device in lsblk_dict_list:
+        if device["serial"] is not None:
+            for disk in disks:
+                if disk is None:
+                    continue
+                if disk.path == device["path"]:
+                    disk.serial = device["serial"]
+                    break
+        else:
+            for disk in disks:
+                if disk is None:
+                    continue
+
+                done = update_partition(disk, device)
+                if done:
+                    break
+
+    # check wether disk is readonly and disk's bindedmountpoint
+    for disk in disks:
+        if disk is None:
+            continue
+
+        disk = check_mounts(disk)
+
+    return disks
+
+
 def get_located_disks() -> List[Optional[Disk]]:
     """construct disks"""
 
@@ -86,65 +192,6 @@ def get_located_disks() -> List[Optional[Disk]]:
                     break
 
     disks = get_details(disks)
-
-    return disks
-
-
-def get_details(disks: List[Optional[Disk]]) -> List[Optional[Disk]]:
-
-    # check wether disk is formatted and is blank
-    lsblk_dict_list = lsblk_to_dict()
-
-    for device in lsblk_dict_list:
-        if device["serial"] is not None:
-            for disk in disks:
-                if disk is None:
-                    continue
-                if disk.path == device["path"]:
-                    disk.serial = device["serial"]
-                    break
-        else:
-            for disk in disks:
-                if disk is None or disk.partition is None:
-                    continue
-                if disk.partition.path == device["path"]:
-                    disk.partition.mountpoint = device["mountpoint"]
-                    disk.partition.fstype = device["fstype"]
-                    disk.partition.label = device["label"]
-                    disk.formatted = (
-                        disk.serial is not None
-                        and disk.serial == disk.partition.label
-                        and disk.partition.fstype == FSType.EXT4
-                    )
-                    disk.partition.mounted = disk.partition.mountpoint != None
-                    if disk.partition.mounted:
-                        disk.partition.isblank = check_blank(disk.partition.mountpoint)
-                    break
-
-    # check wether disk is readonly and disk's bindedmountpoint
-    with open("/proc/mounts", "r", encoding="utf-8") as f:
-        for line in f.readlines():
-            fields = line.split(" ")
-            path = fields[0]
-            mountpoint = fields[1]
-            fstype = fields[2]
-            flags = fields[3]
-            for disk in disks:
-                if disk is None:
-                    continue
-                elif disk.partition is None:
-                    continue
-
-                if disk.partition.path == path:
-                    disk.partition.mounted = True
-                    disk.partition.mountpoint = mountpoint
-                    disk.partition.fstype = fstype
-                    disk.partition.readonly = flags.startswith("ro")
-                    break
-                elif disk.partition.mountpoint == path:
-                    disk.partition.binded = True
-                    disk.partition.bindedmountpoint = mountpoint
-                    break
 
     return disks
 
@@ -222,7 +269,7 @@ def get_disk_path(
                     return disk.path
 
 
-def get_mountpoint(disks: List[Optional[Disk]], disk_path: str) -> Optional[str]:
+def search_mountpoint(disks: List[Optional[Disk]], disk_path: str) -> Optional[str]:
     """disk path -> mountpoint
 
     e.g. "/dev/sda" -> return "/media/fairy26/WSD31X5D"
@@ -242,7 +289,17 @@ def get_mountpoint(disks: List[Optional[Disk]], disk_path: str) -> Optional[str]
                 return None
 
 
-def get_instance(disks: List[Optional[Disk]], target: str) -> Disk:
+def get_avail_mountpoint(disk: Optional[Disk]) -> Optional[str]:
+    if disk is None or disk.partition is None or not disk.partition.mounted:
+        return None
+
+    if disk.partition.binded:
+        return disk.partition.bindedmountpoint
+    else:
+        return disk.partition.mountpoint
+
+
+def search_instance(disks: List[Optional[Disk]], target: str) -> Disk:
     for disk in disks:
         if disk is None:
             continue
@@ -258,8 +315,21 @@ def get_instance(disks: List[Optional[Disk]], target: str) -> Disk:
                 return disk
 
 
-def update_partition(disk: Disk, partition_path: Optional[str] = None, mountpoint: Optional[str] = None):
-    disk.partition = Partition(path=partition_path, mountpoint=mountpoint, mounted=True)
+def apply_format(disk: Optional[Disk]):
+    if disk is None:
+        return
+
+    for device in lsblk_to_dict():
+        done = update_partition(disk, device)
+        if done:
+            return
+
+
+def apply_mount(disk: Optional[Disk]):
+    if disk is None:
+        return
+
+    disk = check_mounts(disk)
 
 
 if __name__ == "__main__":
