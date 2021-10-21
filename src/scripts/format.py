@@ -26,10 +26,10 @@ def run(hdd_path, yes):
         if choice not in ["y", "Y", "yes"]:
             sys.exit(ExitStatus.failure)
 
-    DEFAULT_PARTNUM = "1"
-    DEFAULT_FSYS = "ext4"
+    PARTNUM = "1"
+    FSTYPE = "ext4"
 
-    cmds = [["sgdisk", "--zap-all"], ["sgdisk", "-n"], ["hdparm", "-I"], ["mkfs", "-F", "-L"]]
+    cmds = [["sgdisk", "--zap-all"], ["sgdisk", "-n"], ["hdparm", "-I"], [f"mkfs.{FSTYPE}", "-F", "-L"]]
 
     if os.geteuid():
         for cmd in cmds:
@@ -44,15 +44,14 @@ def run(hdd_path, yes):
     subprocess.run(cmds[0], check=True)  # e.g. ['sgdisk', '--zap-all', '/dev/sda']
     # TODO: if subprocess.CalledProcessError, run `umount` and `partprobe`
 
-    cmds[1].extend([f"{DEFAULT_PARTNUM}::", hdd_path])
+    cmds[1].extend([f"{PARTNUM}::", hdd_path])
     subprocess.run(cmds[1], check=True)  # e.g. ['sgdisk', '-n', '1::', '/dev/sda']
 
     cmds[2].append(hdd_path)
     cp2 = subprocess.run(cmds[2], stdout=PIPE, check=True)  # e.g. ['hdparm', '-I', '/dev/sda']
     hdd_serial = get_serial_num(cp2.stdout.decode())
 
-    hdd_path_part = hdd_path + DEFAULT_PARTNUM
-    cmds[3][0] = f"{cmds[3][0]}.{DEFAULT_FSYS}"  # 'mkfs.' -> 'mkfs.ext4'
+    hdd_path_part = hdd_path + PARTNUM
     cmds[3].extend([hdd_serial, hdd_path_part])
     subprocess.run(cmds[3], check=True)  # e.g. ['mkfs.ext4', '-F', '-L', 'S/N', '/dev/sda1']
 

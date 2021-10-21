@@ -83,7 +83,7 @@ if __name__ == "__main__":
             apply_format(disk=dest)
 
         if not dest.partition.mounted:
-            mount(disk=dest.path, ro=False)
+            mount(disk=dest.partition.path, ro=False)
             apply_mount(disk=dest)
 
         diskcopy(

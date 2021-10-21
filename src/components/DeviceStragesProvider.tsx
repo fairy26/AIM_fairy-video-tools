@@ -140,6 +140,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
   const [remaining, setRemaining] = useState<string>('-');
 
   const progressOn = useCallback((): void => {
+    setLogg('');
     setShowProgress(true);
   }, []);
 
@@ -147,7 +148,6 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     setShowProgress(false);
     setPercentage(0);
     setRemaining('-');
-    setLogg('');
   }, []);
 
   const getProgress = useCallback((arg: string): void => {
@@ -157,8 +157,9 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
   const [logg, setLogg] = useState<string>('');
 
   const updateProgress = (arg: string) => {
-    if (/^\r\d+,\s?(\?|((\d+:)+\d+))/.test(arg)) {
-      const progress = arg.replace(/\r/g, '').split(',');
+    const message = arg.replace(/\r/g, '');
+    if (/^\d+,\s?(\?|((\d+:)+\d+))/.test(message)) {
+      const progress = message.replace(/\s/g, '').split(',');
 
       const newPercentage = parseInt(progress[0], 10);
       const newRemaining = progress[1] === '?' ? '-' : `残り ${progress[1]}`;
@@ -166,7 +167,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
       setPercentage(newPercentage);
       setRemaining(newRemaining);
     } else {
-      setLogg((prev) => `${prev}${arg}\n`);
+      setLogg((prev) => `${prev}${message}\n`);
     }
   };
 

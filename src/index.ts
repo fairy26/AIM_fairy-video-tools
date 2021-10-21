@@ -9,6 +9,8 @@ import { ChildProcess } from 'child_process';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
+const childProcesses: ChildProcess[] = [];
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   // eslint-disable-line global-require
@@ -42,7 +44,7 @@ const createWindow = (): void => {
   mainWindow.on('ready-to-show', () => {
     mainWindow.webContents.send(IpcChannelType.TO_RENDERER, 'M: ping');
     ipcMain.removeHandler(IpcChannelType.TO_MAIN);
-    let prevPyshell: ChildProcess | null = null;
+    // let prevPyshell: ChildProcess | null = null;
     ipcMain.handle(IpcChannelType.TO_MAIN, (event, message) => {
       console.log('M: IpcChannelType.TO_MAIN ', message);
 
@@ -50,13 +52,25 @@ const createWindow = (): void => {
         args: message.message.split(' '),
         // pythonPath: '/home/fairy26/Documents/venv39/bin/python',
         pythonPath: '/home/fairy26/ドキュメント/venv39/bin/python',
+        detached: true,
       };
 
       if (message.message === 'SIGINT') {
-        prevPyshell != null && prevPyshell.exitCode == null && prevPyshell.kill('SIGINT');
+        // prevPyshell != null && prevPyshell.exitCode == null && prevPyshell.kill('SIGINT');
+        childProcesses.forEach((cprocess, index) => {
+          console.log(cprocess.pid, cprocess.exitCode);
+          try {
+            process.kill(-cprocess.pid, 'SIGINT');
+          } catch (e) {
+            // nice catch!
+          }
+          cprocess.exitCode != null && childProcesses.splice(index, 1);
+        });
+        // childProcesses[-1].exitCode == null && process.kill(-childProcesses[-1].pid, 'SIGINT');
       } else {
         const pyshell = new PythonShell('src/scripts/main.py', options);
-        prevPyshell = pyshell.childProcess;
+        // prevPyshell = pyshell.childProcess;
+        childProcesses.push(pyshell.childProcess);
 
         let output: string[] = [];
 
@@ -77,7 +91,10 @@ const createWindow = (): void => {
             console.log('The exit signal was: ' + signal);
             console.log('finished');
 
-            prevPyshell = null;
+            // prevPyshell = null;
+            childProcesses.forEach((cprocess, index) => {
+              cprocess.pid === pyshell.childProcess.pid && childProcesses.splice(index, 1);
+            });
           });
       }
 
@@ -85,6 +102,17 @@ const createWindow = (): void => {
     });
   });
 };
+
+app.on('quit', () => {
+  childProcesses.forEach((cprocess) => {
+    console.log(cprocess.pid);
+    try {
+      process.kill(-cprocess.pid);
+    } catch (e) {
+      // nice catch
+    }
+  });
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
