@@ -3,7 +3,6 @@ import dataclasses
 from enum import Enum
 from glob import glob
 import json
-from json import decoder
 import os
 import re
 import subprocess
@@ -24,7 +23,7 @@ class FSType(str, Enum):
 class Partition:
     # partnum: int
     path: Optional[str] = None  # /dev/sda1
-    mountpoint: Optional[str] = None  # /mnt/raw_sda1 | /media/fairy26/WSD31X5D (only if mounted == True)
+    mountpoint: Optional[str] = None  # /mnt/raw_sda1 (only if mounted == True)
     mounted: bool = False  # True
     label: Optional[str] = None  # WSD31X5D | None
     fstype: Optional[FSType] = None  # ext4
@@ -43,6 +42,21 @@ class Disk:
     formatted: bool = False  # True
     partition: Optional[Partition] = None
 
+    def get_avail_path(self) -> Optional[str]:
+        if self.partition is None or not self.partition.mounted:
+            return None
+
+        if self.partition.binded:
+            return self.partition.bindedmountpoint
+        else:
+            return self.partition.mountpoint
+
+    def get_partition_path(self) -> Optional[str]:
+        if self.partition is None:
+            return None
+        else:
+            return self.partition.path
+
 
 def check_blank(mountpoint: str) -> bool:
     """return wether the disk has .avi files"""
@@ -52,11 +66,10 @@ def check_blank(mountpoint: str) -> bool:
 
 
 def lsblk_to_dict() -> List[dict]:
-    """run lsblk(8) and return device information in JSON format"""
+    """run `$ lsblk` and return device information"""
     cmd = ["lsblk", "-e", "7,259", "-Jo", "PATH,SERIAL,MOUNTPOINT,LABEL,FSTYPE"]
     cp = subprocess.run(cmd, stdout=PIPE, check=True)
     lsblk_output = cp.stdout.decode()
-    # print(lsblk_output)
     return json.loads(lsblk_output)["blockdevices"]
 
 
@@ -176,7 +189,7 @@ def get_located_disks() -> List[Optional[Disk]]:
         for entry in it:
             entry_path = os.path.realpath(entry.path)
             for i, port in enumerate(PORT):
-                m = re.search(f"\d\.{port}", entry.name)
+                m = re.search(f":\d\.{port}:", entry.name)
                 if m:
                     if disks[i] is None:
                         disks[i] = Disk(position=i + 1, port=m.group(0))
@@ -197,7 +210,7 @@ def get_located_disks() -> List[Optional[Disk]]:
 
 
 def get_disk_list(disks: List[Optional[Disk]]) -> List[str]:
-    disk_list = ["empty"] * 10
+    disk_list = ["empty"] * len(disks)
 
     for i, disk in enumerate(disks):
         if disk is not None:
@@ -207,7 +220,7 @@ def get_disk_list(disks: List[Optional[Disk]]) -> List[str]:
 
 
 def get_partition_list(disks: List[Optional[Disk]]) -> List[str]:
-    partition_list = ["empty"] * 10
+    partition_list = ["empty"] * len(disks)
 
     for i, disk in enumerate(disks):
         if disk is not None:
@@ -218,7 +231,7 @@ def get_partition_list(disks: List[Optional[Disk]]) -> List[str]:
 
 
 def get_mountpoint_list(disks: List[Optional[Disk]]) -> List[str]:
-    mountpoint_list = ["empty"] * 10
+    mountpoint_list = ["empty"] * len(disks)
 
     for i, disk in enumerate(disks):
         if disk is not None:
@@ -234,7 +247,7 @@ def get_mountpoint_list(disks: List[Optional[Disk]]) -> List[str]:
 
 
 def get_access_list(disks: List[Optional[Disk]]) -> List[str]:
-    access_list = ["empty"] * 10
+    access_list = ["empty"] * len(disks)
 
     for i, disk in enumerate(disks):
         if disk is not None:
@@ -255,7 +268,10 @@ def get_disk_path(
     mountpoint: Optional[str] = None,
 ) -> Optional[str]:
     target = partition_path or mountpoint
-    if not os.path.exists(target):
+
+    if target is None:
+        return None
+    elif not os.path.exists(target):
         return None
 
     for disk in disks:
@@ -267,36 +283,6 @@ def get_disk_path(
                     return disk.path
                 elif disk.partition.bindedmountpoint == target:
                     return disk.path
-
-
-def search_mountpoint(disks: List[Optional[Disk]], disk_path: str) -> Optional[str]:
-    """disk path -> mountpoint
-
-    e.g. "/dev/sda" -> return "/media/fairy26/WSD31X5D"
-    e.g. "/dev/sda" -> return "/mnt/sda1"
-    """
-    if not os.path.exists(disk_path):
-        return None
-
-    for disk in disks:
-        if disk is not None and disk.path == disk_path:
-            if disk.partition is not None and disk.partition.mounted:
-                if disk.partition.binded:
-                    return disk.partition.bindedmountpoint
-                else:
-                    return disk.partition.mountpoint
-            else:
-                return None
-
-
-def get_avail_mountpoint(disk: Optional[Disk]) -> Optional[str]:
-    if disk is None or disk.partition is None or not disk.partition.mounted:
-        return None
-
-    if disk.partition.binded:
-        return disk.partition.bindedmountpoint
-    else:
-        return disk.partition.mountpoint
 
 
 def search_instance(disks: List[Optional[Disk]], target: str) -> Disk:

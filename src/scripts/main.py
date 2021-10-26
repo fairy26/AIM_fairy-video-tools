@@ -1,17 +1,19 @@
 import argparse
-from glob import glob
-import os
-import re
-import subprocess
-from subprocess import PIPE
 import sys
 import json
 from importlib import resources
 from logging import config, getLogger
 
-from check import get_hdd_lists
 from mount import mount
-from utils import apply_format, apply_mount, get_avail_mountpoint, get_located_disks, search_instance, update_partition
+from utils import (
+    apply_format,
+    apply_mount,
+    get_access_list,
+    get_disk_list,
+    get_located_disks,
+    get_mountpoint_list,
+    search_instance,
+)
 from unmount import unmount
 from format import run as format
 from diskcopy import run as diskcopy
@@ -50,11 +52,18 @@ if __name__ == "__main__":
             conf["root"]["level"] = "ERROR"
         config.dictConfig(conf)
 
+    disks = get_located_disks()
+
     if args.mount:
         send("mount")
+        target = search_instance(disks, args.path[0])
 
-        status = mount(args.path[0], args.ro)
-        send(status)
+        if target.partition is not None and not target.partition.mounted:
+            mount(disk=target.partition.path, ro=args.ro)
+            apply_mount(disk=target)
+
+        mpath = target.get_avail_path() or "not_mounted"
+        send(mpath)
 
     if args.unmount:
         send("unmount")
@@ -65,14 +74,12 @@ if __name__ == "__main__":
     if args.check:
         send("check")
 
-        hdd_list, mounted_list, access_list = get_hdd_lists()
-        send(hdd_list)
-        send(mounted_list)
-        send(access_list)
+        send(get_disk_list(disks))
+        send(get_mountpoint_list(disks))
+        send(get_access_list(disks))
 
     if args.copycheck:
 
-        disks = get_located_disks()
         src = search_instance(disks, args.path[0])
         dest = search_instance(disks, args.path[1])
 
@@ -90,7 +97,6 @@ if __name__ == "__main__":
             # TODO: inform error to app
             sys.exit(-1)
 
-        disks = get_located_disks()
         src = search_instance(disks, args.path[0])
         dest = search_instance(disks, args.path[1])
 
@@ -103,8 +109,8 @@ if __name__ == "__main__":
             apply_mount(disk=dest)
 
         diskcopy(
-            src=get_avail_mountpoint(disk=src),
-            dest=get_avail_mountpoint(disk=dest),
+            src=src.get_avail_path(),
+            dest=dest.get_avail_path(),
             includes=None,
             excludes=None,
             dry_run=False,

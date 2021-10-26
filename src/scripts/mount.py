@@ -31,14 +31,14 @@ def mount(disk, ro=False):
         # os.execlp('sudo', *args)
         authorized = False
 
-    if not os.path.exists(disk):
-        return "not_mounted"
+    if disk is None or not os.path.exists(disk):
+        return
 
     realpath = os.path.realpath(disk)
 
     m = re.match(r"/dev/(sd.+)", realpath)
     if not m:
-        return "not_mounted"
+        return
 
     device_name = m.group(1)
     raw_disk_mount_path = os.path.join("/mnt", f"raw_{device_name}")
