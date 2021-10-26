@@ -1,46 +1,19 @@
 import React, { useState } from 'react';
 
 import {
-  Alert,
   Autocomplete,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
   Grid,
   LinearProgress,
-  // Paper,
-  Snackbar,
   TextareaAutosize,
   TextField,
   Typography,
 } from '@mui/material';
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
-
-type Props = {
-  disk: string;
-};
-
-const NotBlankAlert: React.VFC<Props> = ({ disk }) => {
-  const [alertOpen, setAlertOpen] = useState<boolean>(false);
-
-  const handleAlertClose = () => {
-    setAlertOpen(false);
-  };
-
-  return (
-    <>
-      <Button onClick={() => setAlertOpen(true)}>open</Button>
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={alertOpen}
-        autoHideDuration={1000}
-        onClose={handleAlertClose}
-      >
-        <Alert severity="error" onClose={handleAlertClose}>
-          {disk} is not black!
-        </Alert>
-      </Snackbar>
-    </>
-  );
-};
 
 export const DiskCopy: React.FC = () => {
   const {
@@ -55,8 +28,12 @@ export const DiskCopy: React.FC = () => {
     destination,
     destinations,
     handleDestinationChange,
-    handleCopy,
+    handleCopycheck,
     logg,
+    alertDialogOpen,
+    handleAgree,
+    handleDisagree,
+    alertDialogContent,
   } = useDeviceStragesFunctions();
 
   const scrollRef = React.useRef(null);
@@ -99,10 +76,10 @@ export const DiskCopy: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ marginLeft: 'auto' }}>
           <Button
             variant="outlined"
-            onClick={handleCopy(source, destination)}
+            onClick={handleCopycheck(source, destination)}
             disabled={source == null || destination == null}
           >
             実行
@@ -112,22 +89,15 @@ export const DiskCopy: React.FC = () => {
         {showProgress && (
           <>
             <Grid item xs container direction="column" spacing={0.5}>
-              {/*TODO: 実行中も元と先が表示されるようMemoを追加*/
-              /* <Grid item xs zeroMinWidth>
-              <Typography variant="body1" color="text.primary" noWrap>
-                {`コピー元: ${source} / コピー先: ${destination}`}
-              </Typography>
-            </Grid> */}
-
               <Grid item xs>
-              <LinearProgress variant="determinate" value={percentage} />
-            </Grid>
+                <LinearProgress variant="determinate" value={percentage} />
+              </Grid>
 
               <Grid item xs zeroMinWidth sx={{ marginLeft: 'auto' }}>
-              <Typography variant="body2" color="text.secondary" noWrap>
+                <Typography variant="body2" color="text.secondary" noWrap>
                   {remaining ? `${remaining} (${endTime})` : ' '}
-              </Typography>
-            </Grid>
+                </Typography>
+              </Grid>
             </Grid>
 
             <Grid item xs="auto" sx={{ marginLeft: 'auto' }}>
@@ -139,23 +109,25 @@ export const DiskCopy: React.FC = () => {
         )}
       </Grid>
 
-      {/* <NotBlankAlert disk={'/sda/hoge'} /> */}
-
-      {/* python からの出力を表示する Paper */}
-      {/* <Paper
-        elevation={3}
-        sx={{
-          width: '100',
-          marginTop: 5,
-          padding: 3,
-          // maxHeight: '300px',
-          // overflowX: 'hidden',
-          // overflowY: 'scroll',
-        }}
-      >
-        {logg}
-      </Paper> */}
       <TextareaAutosize ref={scrollRef} maxRows={20} value={logg} disabled />
+
+      <Dialog
+        open={alertDialogOpen}
+        onClose={handleDisagree}
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">{alertDialogContent}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={handleAgree}>
+            はい
+          </Button>
+          <Button variant="outlined" onClick={handleDisagree} autoFocus color="error">
+            キャンセル
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

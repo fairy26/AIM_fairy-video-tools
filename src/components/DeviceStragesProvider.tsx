@@ -31,7 +31,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     console.log('R: only one after initial render');
 
     api.onSendToRenderer(callback);
-    api.onSendToRendererInRealTime(getProgress);
+    api.onSendToRendererInRealTime(handleStderr);
 
     send('--check');
 
@@ -127,15 +127,26 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     setDestination(newValue);
   };
 
-  const sources = mountPoints.filter(
-    (name: string, index: number) =>
-      name !== 'not_mounted' && name !== 'empty' && readOnlyFlags[index] && name !== destination
+  const sources = useMemo<string[]>(
+    () =>
+      mountPoints.filter(
+        (name: string, index: number) =>
+          name !== 'not_mounted' && name !== 'empty' && readOnlyFlags[index] && name !== destination
+      ),
+    [mountPoints]
   );
-  const destinations = mountPoints
-    .map((name: string, index: number) => (name === 'not_mounted' ? disks[index] : name))
-    .filter(
-      (name: string, index: number) => name !== 'empty' && !readOnlyFlags[index] && name !== source
-    );
+
+  const destinations = useMemo<string[]>(
+    () =>
+      mountPoints
+        .map((name: string, index: number) => (name === 'not_mounted' ? disks[index] : name))
+        .filter(
+          (name: string, index: number) =>
+            name !== 'empty' && !readOnlyFlags[index] && name !== source
+        ),
+    [mountPoints]
+  );
+
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [percentage, setPercentage] = useState<number>(0);
   const [remaining, setRemaining] = useState<string>('');
@@ -154,9 +165,25 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     setEndTime('');
   }, []);
 
-  const getProgress = useCallback((arg: string): void => {
-    arg === 'finished' ? progressOff() : updateProgress(arg);
-  }, []);
+  const handleStderr = (arg: string): void => {
+    console.log(arg);
+
+    const [prefix, ...messages] = arg.split(' ');
+
+    switch (prefix) {
+      case 'ALERT':
+        setAlertDialogContent(messages.join(' '));
+        break;
+      case 'OK':
+        handleCopy(messages[0], messages[1]);
+        break;
+      case 'COMPLETED':
+        progressOff();
+        break;
+      default:
+        updateProgress(arg);
+    }
+  };
 
   const formatInterval = (t: number): string => {
     const [mins, s] = divmod(t, 60);
@@ -199,14 +226,29 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     }
   };
 
-  const handleCopy = useCallback(
-    (src: string, dest: string) => (): void => {
-      console.log('R: clicked, check hdd list');
+  const handleCopy = useCallback((src: string, dest: string) => {
+    console.log(`R: clicked, copy ${src} -> ${dest}`);
 
-      send(`--copy --path ${src} ${dest}`);
-      progressOn();
-      setSource(null);
-      setDestination(null);
+    send(`--copy --path ${src} ${dest}`);
+    progressOn();
+    setSource(null);
+    setDestination(null);
+  }, []);
+
+  const handleCopyFormat = useCallback((src: string, dest: string) => {
+    console.log(`R: clicked, format ${dest} & copy ${src} -> ${dest}`);
+
+    send(`--copy --format --path ${src} ${dest}`);
+    progressOn();
+    setSource(null);
+    setDestination(null);
+  }, []);
+
+  const handleCopycheck = useCallback(
+    (src: string, dest: string) => (): void => {
+      console.log(`R: copycheck ${src}, ${dest}`);
+
+      send(`--copycheck --path ${src} ${dest}`);
     },
     []
   );
@@ -217,6 +259,28 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     send('SIGINT');
     progressOff();
   }, []);
+
+  const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false);
+  const [alertDialogContent, setAlertDialogContent] = useState<string>('');
+
+  const handleAlertDialogClose = () => {
+    setAlertDialogOpen(false);
+    setAlertDialogContent('');
+  };
+
+  const handleAgree = () => {
+    handleCopyFormat(source, destination);
+    handleAlertDialogClose();
+  };
+
+  const handleDisagree = () => {
+    progressOff();
+    handleAlertDialogClose();
+  };
+
+  const handleAlertDialogOpen = useEffect(() => {
+    alertDialogContent && setAlertDialogOpen(true);
+  }, [alertDialogContent]);
 
   return (
     <DeviceStragesCtx.Provider
@@ -239,8 +303,12 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         destination,
         destinations,
         handleDestinationChange,
-        handleCopy,
+        handleCopycheck,
         logg,
+        alertDialogOpen,
+        handleAgree,
+        handleDisagree,
+        alertDialogContent,
       }}
     >
       {children}

@@ -44,7 +44,6 @@ const createWindow = (): void => {
   mainWindow.on('ready-to-show', () => {
     mainWindow.webContents.send(IpcChannelType.TO_RENDERER, 'M: ping');
     ipcMain.removeHandler(IpcChannelType.TO_MAIN);
-    // let prevPyshell: ChildProcess | null = null;
     ipcMain.handle(IpcChannelType.TO_MAIN, (event, message) => {
       console.log('M: IpcChannelType.TO_MAIN ', message);
 
@@ -56,7 +55,6 @@ const createWindow = (): void => {
       };
 
       if (message.message === 'SIGINT') {
-        // prevPyshell != null && prevPyshell.exitCode == null && prevPyshell.kill('SIGINT');
         childProcesses.forEach((cprocess, index) => {
           console.log(cprocess.pid, cprocess.exitCode);
           try {
@@ -66,32 +64,28 @@ const createWindow = (): void => {
           }
           cprocess.exitCode != null && childProcesses.splice(index, 1);
         });
-        // childProcesses[-1].exitCode == null && process.kill(-childProcesses[-1].pid, 'SIGINT');
       } else {
         const pyshell = new PythonShell('src/scripts/main.py', options);
-        // prevPyshell = pyshell.childProcess;
         childProcesses.push(pyshell.childProcess);
 
         let output: string[] = [];
 
         pyshell
-          .on('message', (message) => {
+          .on('message', (message: string) => {
             output.push(message);
           })
-          .on('stderr', (stderr) => {
+          .on('stderr', (stderr: string) => {
             console.log(stderr);
             mainWindow.webContents.send(IpcChannelType.TO_RENDERER_IN_RT, stderr);
           })
           .end((err, code, signal) => {
             if (err) throw err;
             mainWindow.webContents.send(IpcChannelType.TO_RENDERER, output);
-            mainWindow.webContents.send(IpcChannelType.TO_RENDERER_IN_RT, 'finished');
 
             console.log('The exit code was: ' + code);
             console.log('The exit signal was: ' + signal);
             console.log('finished');
 
-            // prevPyshell = null;
             childProcesses.forEach((cprocess, index) => {
               cprocess.pid === pyshell.childProcess.pid && childProcesses.splice(index, 1);
             });

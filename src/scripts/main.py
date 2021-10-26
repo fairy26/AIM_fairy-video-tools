@@ -17,7 +17,9 @@ from format import run as format
 from diskcopy import run as diskcopy
 
 
-def send(message, file=sys.stdout):
+def send(message, file=sys.stdout, prefix=None):
+    if prefix:
+        message = f"{prefix} {message}"
     print(message, file=file)
     file.flush()
 
@@ -36,7 +38,9 @@ if __name__ == "__main__":
     parser.add_argument("--ro", "--read-only", action="store_true")
     parser.add_argument("--unmount", action="store_true")
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--copycheck", action="store_true")
     parser.add_argument("--copy", action="store_true")
+    parser.add_argument("--format", action="store_true")
     args = parser.parse_args()
 
     # with resources.path("data", "log_config.json") as log_config:
@@ -66,6 +70,19 @@ if __name__ == "__main__":
         send(mounted_list)
         send(access_list)
 
+    if args.copycheck:
+
+        disks = get_located_disks()
+        src = search_instance(disks, args.path[0])
+        dest = search_instance(disks, args.path[1])
+
+        if dest.partition is None:
+            send("コピー先のHDDにパーティションがありません。フォーマットしますか？", file=sys.stderr, prefix="ALERT")
+        elif not dest.formatted and dest.partition.isblank:
+            send("コピー先のHDDがフォーマットされていません。フォーマットしますか？", file=sys.stderr, prefix="ALERT")
+        else:
+            send(f"{args.path[0]} {args.path[1]}", file=sys.stderr, prefix="OK")
+
     if args.copy:
         send("copy")
 
@@ -78,11 +95,10 @@ if __name__ == "__main__":
         dest = search_instance(disks, args.path[1])
 
         if dest.partition is None or (not dest.formatted and dest.partition.isblank):
-            # TODO: ask to format and get stdin from GUI
-            format(hdd_path=dest.path, yes=True)
+            format(hdd_path=dest.path, yes=args.format)
             apply_format(disk=dest)
 
-        if not dest.partition.mounted:
+        if dest.partition is not None and not dest.partition.mounted:
             mount(disk=dest.partition.path, ro=False)
             apply_mount(disk=dest)
 
@@ -95,3 +111,5 @@ if __name__ == "__main__":
             quiet=True,
             simplebar=True,
         )
+
+        send("copy", file=sys.stderr, prefix="COMPLETED")

@@ -19,7 +19,7 @@ logger = getLogger(__name__)
 def run(src, dest, includes, excludes, dry_run=False, quiet=False, simplebar=False):
 
     diskcopy(src, dest, includes, excludes, dry_run, quiet, simplebar)
-    sys.exit(ExitStatus.success)
+    # sys.exit(ExitStatus.success)
 
 
 def diskcopy(src, dest, includes=None, excludes=None, dry_run=True, quiet=False, simplebar=False):
@@ -68,6 +68,7 @@ def diskcopy(src, dest, includes=None, excludes=None, dry_run=True, quiet=False,
                 logger.info(f"os.makedirs({dir_path}, exist_ok=True)")
             else:
                 os.makedirs(dir_path, exist_ok=True)
+                # TODO: ERROR: Permission denied: '/media/fairy26/WSD31X5D/2021-04-27'
                 logger.info(f"(mkdir) {dir_path}")
 
         if type(node) == FileNode:
