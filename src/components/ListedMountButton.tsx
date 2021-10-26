@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, Checkbox, FormControlLabel, Switch } from '@mui/material';
+import { Button, Checkbox, FormControlLabel } from '@mui/material';
 import { PlayCircle as PlayCircleIcon, StopCircle as StopCircleIcon } from '@mui/icons-material';
 
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
@@ -17,12 +17,13 @@ export const ListedMountButton: React.VFC<Props> = ({ isMounted, index }) => {
     <>
       <FormControlLabel
         id={index.toString()}
-        label={readOnlyFlags[index] ? 'ro' : 'rw'}
+        label="RO"
         control={
           <Checkbox
             checked={readOnlyFlags[index]}
             disabled={isMounted}
             onChange={handleReadOnly(index)}
+            title="RO"
             inputProps={{ 'aria-label': 'Read Only' }}
           />
         }

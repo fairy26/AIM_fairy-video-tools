@@ -70,7 +70,7 @@ export const DeviceStrages: React.FC = () => {
                     secondary={isEmpty ? null : isMounted ? mountPoints[index] : 'not mounted'}
                     sx={{
                       border: 1,
-                      maxWidth: 270,
+                      maxWidth: 250,
                       paddingX: '4px',
                       paddingY: isEmpty ? '14.01px' : '4px',
                       bgcolor: 'common.white',
