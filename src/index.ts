@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import { existsSync } from 'fs';
 import { IpcChannelType } from './IpcChannelType';
 import { PythonShell } from 'python-shell';
 import { ChildProcess } from 'child_process';
@@ -44,53 +45,12 @@ const createWindow = (): void => {
   mainWindow.on('ready-to-show', () => {
     mainWindow.webContents.send(IpcChannelType.TO_RENDERER, 'M: ping');
     ipcMain.removeHandler(IpcChannelType.TO_MAIN);
+
+    // const pymainPath = path.join(__dirname, 'src', 'scrtipts', 'main.py');
     ipcMain.handle(IpcChannelType.TO_MAIN, (event, message) => {
       console.log('M: IpcChannelType.TO_MAIN ', message);
 
-      const options = {
-        args: message.message.split(' '),
-        // pythonPath: '/home/fairy26/Documents/venv39/bin/python',
-        pythonPath: '/home/fairy26/ドキュメント/venv39/bin/python',
-        detached: true,
-      };
-
-      if (message.message === 'SIGINT') {
-        childProcesses.forEach((cprocess, index) => {
-          console.log(cprocess.pid, cprocess.exitCode);
-          try {
-            process.kill(-cprocess.pid, 'SIGINT');
-          } catch (e) {
-            // nice catch!
-          }
-          cprocess.exitCode != null && childProcesses.splice(index, 1);
-        });
-      } else {
-        const pyshell = new PythonShell('src/scripts/main.py', options);
-        childProcesses.push(pyshell.childProcess);
-
-        let output: string[] = [];
-
-        pyshell
-          .on('message', (message: string) => {
-            output.push(message);
-          })
-          .on('stderr', (stderr: string) => {
-            console.log(stderr);
-            mainWindow.webContents.send(IpcChannelType.TO_RENDERER_IN_RT, stderr);
-          })
-          .end((err, code, signal) => {
-            if (err) throw err;
-            mainWindow.webContents.send(IpcChannelType.TO_RENDERER, output);
-
-            console.log('The exit code was: ' + code);
-            console.log('The exit signal was: ' + signal);
-            console.log('finished');
-
-            childProcesses.forEach((cprocess, index) => {
-              cprocess.pid === pyshell.childProcess.pid && childProcesses.splice(index, 1);
-            });
-          });
-      }
+      message.message === 'SIGINT' ? killChildProcesses('SIGINT') : execPython(mainWindow, message);
 
       return 'M: pong';
     });
@@ -98,14 +58,7 @@ const createWindow = (): void => {
 };
 
 app.on('quit', () => {
-  childProcesses.forEach((cprocess) => {
-    console.log(cprocess.pid);
-    try {
-      process.kill(-cprocess.pid);
-    } catch (e) {
-      // nice catch
-    }
-  });
+  killChildProcesses();
 });
 
 // This method will be called when Electron has finished
@@ -132,3 +85,50 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+const killChildProcesses = (signal?: string) => {
+  childProcesses.forEach((cprocess, index) => {
+    console.log(`kill ${cprocess.pid}(${cprocess.exitCode})`);
+    try {
+      signal ? process.kill(-cprocess.pid, signal) : process.kill(-cprocess.pid);
+    } catch (e) {
+      // nice catch
+    }
+    cprocess.exitCode != null && childProcesses.splice(index, 1);
+  });
+};
+
+const execPython = (window: BrowserWindow, message: any): void => {
+  const options = {
+    args: message.message.split(' '),
+    // pythonPath: '/home/fairy26/Documents/venv39/bin/python',
+    pythonPath: '/home/fairy26/ドキュメント/venv39/bin/python',
+    detached: true,
+  };
+
+  const pyshell = new PythonShell('src/scripts/main.py', options);
+  childProcesses.push(pyshell.childProcess);
+
+  let output: string[] = [];
+
+  pyshell
+    .on('message', (message: string) => {
+      output.push(message);
+    })
+    .on('stderr', (stderr: string) => {
+      console.log(stderr);
+      window.webContents.send(IpcChannelType.TO_RENDERER_IN_RT, stderr);
+    })
+    .end((err, code, signal) => {
+      if (err) throw err;
+      window.webContents.send(IpcChannelType.TO_RENDERER, output);
+
+      console.log('The exit code was: ' + code);
+      console.log('The exit signal was: ' + signal);
+      console.log('finished');
+
+      childProcesses.forEach((cprocess, index) => {
+        cprocess.pid === pyshell.childProcess.pid && childProcesses.splice(index, 1);
+      });
+    });
+};
