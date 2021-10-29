@@ -1,6 +1,6 @@
-const path = require('path')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-const pythonDir = 'scripts'
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const pyDir = 'scripts';
 
 module.exports = {
   /**
@@ -13,15 +13,15 @@ module.exports = {
     rules: require('./webpack.rules'),
   },
   resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json']
+    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, 'src', pythonDir),
-          to: path.resolve(__dirname, '.webpack', 'main', pythonDir)
-        }
+          from: path.resolve(__dirname, 'src', pyDir),
+          to: path.resolve(__dirname, '.webpack', 'main', pyDir),
+        },
       ],
     }),
   ],
