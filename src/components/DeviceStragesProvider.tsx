@@ -13,7 +13,7 @@ import { ContextBridgeApi } from '../preload';
 const DeviceStragesCtx = createContext(null);
 export const useDeviceStragesFunctions = () => useContext(DeviceStragesCtx);
 
-const strToArray = (str: string): string[] => str.slice(1, -1).split(', ');
+const strToArray = (str: string): string[] => str.slice(1, -1).split(',');
 const removeSingleQuote = (str: string): string => str.replace(/'/g, '');
 const divmod = (x: number, y: number): number[] => [Math.floor(x / y), x % y];
 
@@ -30,7 +30,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
   useEffect(() => {
     console.log('R: only one after initial render');
 
-    api.onSendToRenderer(callback);
+    api.onSendToRenderer(handleStdout);
     api.onSendToRendererInRealTime(handleStderr);
 
     send('--check');
@@ -38,7 +38,6 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     return api.removeOnSendToRenderers;
   }, []);
 
-  const [message, setMessage] = useState<string[]>([]);
   const [disks, setDisks] = useState<string[]>(Array(10).fill('empty'));
   const [mountPoints, setMountPoints] = useState<string[]>(Array(10).fill('empty'));
   const mounted = useMemo<boolean[]>(
@@ -59,41 +58,34 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     setMountPoints((prev) => [...prev.map((element, i) => (i === index ? mountPoint : element))]);
   };
 
-  const callback = useCallback((args: string[]): void => {
-    console.log('R: onSendToRenderer ', args);
-    setMessage(args);
-  }, []);
-
-  useEffect(() => {
-    const prefix: string = message[0];
-    const results: string[] = message.slice(1);
+  const handleStdout = (arg: string): void => {
+    console.log(arg);
+    const [prefix, ...messages] = arg.split(' ');
+    const message = messages.join('');
 
     switch (prefix) {
-      case 'check':
-        const strArgs = results.map((element) => removeSingleQuote(element));
-        const newDisks = strToArray(strArgs[0]);
-        const newMountPoints = strToArray(strArgs[1]);
-        const newReadOnlyFlags = strToArray(strArgs[2]).map((access) => access === 'ro');
-
+      case 'disk':
+        const newDisks = strToArray(removeSingleQuote(message));
         setDisks(newDisks);
+        break;
+      case 'mountpoint':
+        const newMountPoints = strToArray(removeSingleQuote(message));
         setMountPoints(newMountPoints);
+        break;
+      case 'access':
+        const newReadOnlyFlags = strToArray(removeSingleQuote(message)).map(
+          (access) => access === 'ro'
+        );
         setReadOnlyFlags(newReadOnlyFlags);
         break;
-
       case 'mount':
       case 'unmount':
-        updateOneMountPoint(results[0]);
+        updateOneMountPoint(message);
         break;
-
-      case 'copy':
-        // console.log(results);
-        break;
-
       default:
         console.log('python-shell send unexpected messages');
-        break;
     }
-  }, [message]);
+  };
 
   const handleMount = (newIndex: number) => (): void => {
     console.log('R: clicked, change mount states' + newIndex);

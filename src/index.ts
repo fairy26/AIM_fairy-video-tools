@@ -11,7 +11,7 @@ import { ChildProcess, spawn } from 'child_process';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
-// const isPackaged: boolean = require('electron-is-packaged').isPackaged;
+const isPackaged: boolean = require('electron-is-packaged').isPackaged;
 const childProcesses: ChildProcess[] = [];
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -120,25 +120,29 @@ const killChildProcesses = (signal?: string) => {
 const execPython = (window: BrowserWindow, message: any): void => {
   const args = message.message.split(' ');
   const scriptPath = getScriptPath();
-  let output: string[] = [];
+
+  window.webContents.send(
+    IpcChannelType.TO_RENDERER_STDERR,
+    `${__dirname}: ${isPackaged} & ${guessPackaged()}`
+  );
 
   if (guessPackaged()) {
     console.log(scriptPath);
     const pyps: ChildProcess = spawn(scriptPath, args, { detached: true });
     childProcesses.push(pyps);
 
-    pyps.stdout.on('data', (stdout: string) => {
-      output.push(stdout);
+    pyps.stdout.on('data', (data: string) => {
+      const stdout = data.toString();
+      window.webContents.send(IpcChannelType.TO_RENDERER, stdout);
     });
 
-    pyps.stderr.on('data', (stderr: string) => {
+    pyps.stderr.on('data', (data: string) => {
+      const stderr = data.toString();
       console.log(stderr);
-      window.webContents.send(IpcChannelType.TO_RENDERER_IN_RT, stderr);
+      window.webContents.send(IpcChannelType.TO_RENDERER_STDERR, stderr);
     });
 
     pyps.on('close', (code: number, signal: string) => {
-      window.webContents.send(IpcChannelType.TO_RENDERER, output);
-
       console.log('The exit code was: ' + code);
       console.log('The exit signal was: ' + signal);
       console.log('finished');
@@ -163,16 +167,15 @@ const execPython = (window: BrowserWindow, message: any): void => {
     childProcesses.push(pyshell.childProcess);
 
     pyshell
-      .on('message', (message: string) => {
-        output.push(message);
+      .on('message', (stdout: string) => {
+        window.webContents.send(IpcChannelType.TO_RENDERER, stdout);
       })
       .on('stderr', (stderr: string) => {
         console.log(stderr);
-        window.webContents.send(IpcChannelType.TO_RENDERER_IN_RT, stderr);
+        window.webContents.send(IpcChannelType.TO_RENDERER_STDERR, stderr);
       })
       .end((err, code, signal) => {
         if (err) throw err;
-        window.webContents.send(IpcChannelType.TO_RENDERER, output);
 
         console.log('The exit code was: ' + code);
         console.log('The exit signal was: ' + signal);

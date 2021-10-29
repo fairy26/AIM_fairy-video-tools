@@ -45,17 +45,21 @@ if __name__ == "__main__":
     parser.add_argument("--format", action="store_true")
     args = parser.parse_args()
 
-    with resources.path("data", "log_config.json") as log_config:
-        with open(log_config, encoding="utf-8") as f:
-            conf = json.load(f)
-            if args.quiet:
-                conf["root"]["level"] = "ERROR"
-            config.dictConfig(conf)
+    # with resources.path("data", "log_config.json") as log_config:
+    #     with open(log_config, encoding="utf-8") as f:
+    #         conf = json.load(f)
+    #         if args.quiet:
+    #             conf["root"]["level"] = "ERROR"
+    #         config.dictConfig(conf)
+    # with open("src/scripts/data/log_config.json", encoding="utf-8") as f:
+    #     conf = json.load(f)
+    #     if args.quiet:
+    #         conf["root"]["level"] = "ERROR"
+    #     config.dictConfig(conf)
 
     disks = get_located_disks()
 
     if args.mount:
-        send("mount")
         target = search_instance(disks, args.path[0])
 
         if target.partition is not None and not target.partition.mounted:
@@ -63,20 +67,16 @@ if __name__ == "__main__":
             apply_mount(disk=target)
 
         mpath = target.get_avail_path() or "not_mounted"
-        send(mpath)
+        send(mpath, prefix="mount")
 
     if args.unmount:
-        send("unmount")
-
         status = unmount(args.path[0])
-        send(status)
+        send(status, prefix="unmount")
 
     if args.check:
-        send("check")
-
-        send(get_disk_list(disks))
-        send(get_mountpoint_list(disks))
-        send(get_access_list(disks))
+        send(get_disk_list(disks), prefix="disk")
+        send(get_mountpoint_list(disks), prefix="mountpoint")
+        send(get_access_list(disks), prefix="access")
 
     if args.copycheck:
 
@@ -91,8 +91,6 @@ if __name__ == "__main__":
             send(f"{args.path[0]} {args.path[1]}", file=sys.stderr, prefix="OK")
 
     if args.copy:
-        send("copy")
-
         if len(args.path) != 2:
             # TODO: inform error to app
             sys.exit(-1)

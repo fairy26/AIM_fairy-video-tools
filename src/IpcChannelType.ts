@@ -2,5 +2,5 @@
 export enum IpcChannelType {
   TO_MAIN = 'to-main',
   TO_RENDERER = 'to-renderer',
-  TO_RENDERER_IN_RT = 'to-renderer-realtime',
+  TO_RENDERER_STDERR = 'to-renderer-stderr',
 }

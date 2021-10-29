@@ -17,15 +17,15 @@ export class ContextBridgeApi {
   };
 
   // <= window.api.onSendToRenderer(callback) でMainプロセスから受信する
-  public onSendToRenderer = (rendererListener: (message: string[]) => void) => {
-    ipcRenderer.on(IpcChannelType.TO_RENDERER, (event: IpcRendererEvent, args: string[]) => {
+  public onSendToRenderer = (rendererListener: (message: string) => void) => {
+    ipcRenderer.on(IpcChannelType.TO_RENDERER, (event: IpcRendererEvent, args: string) => {
       rendererListener(args);
     });
   };
 
   // <= window.api.onSendToRendererInRealTime(callback) でMainプロセス(python-shell)からリアルタイムに受信する
   public onSendToRendererInRealTime = (rendererListener: (message: string) => void) => {
-    ipcRenderer.on(IpcChannelType.TO_RENDERER_IN_RT, (event: IpcRendererEvent, args: string) => {
+    ipcRenderer.on(IpcChannelType.TO_RENDERER_STDERR, (event: IpcRendererEvent, args: string) => {
       rendererListener(args);
     });
   };
@@ -33,7 +33,7 @@ export class ContextBridgeApi {
   // <= Mainプロセスから受信するリスナーを削除する
   public removeOnSendToRenderers = () => {
     ipcRenderer.removeAllListeners(IpcChannelType.TO_RENDERER);
-    ipcRenderer.removeAllListeners(IpcChannelType.TO_RENDERER_IN_RT);
+    ipcRenderer.removeAllListeners(IpcChannelType.TO_RENDERER_STDERR);
   };
 }
 
