@@ -105,7 +105,6 @@ def diskcopy(src, dest, includes=None, excludes=None, dry_run=True, quiet=False,
                             os.remove(dest_path)
                         pbar.update(node.size)
                         logger.error(f"(failed) {src_path}")
-                    # pbar.update(node.size)  # test
             else:
                 if dry_run:
                     logger.info(f"shutil.copy({src_path}, {dest_path})")

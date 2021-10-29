@@ -9,6 +9,8 @@ import {
   Avatar,
   Grid,
   IconButton,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { PowerSettingsNewRounded as PowerSettingsNewRoundedIcon } from '@mui/icons-material';
 
@@ -18,7 +20,21 @@ import { PowerOnBadge } from './PowerOnBadge';
 import { ListedMountButton } from './ListedMountButton';
 
 export const DeviceStrages: React.FC = () => {
-  const { disks, mounted, mountPoints } = useDeviceStragesFunctions();
+  const { disks, mounted, mountPoints, snackbarOpen, handleSnackbarClose, snackbarMessage } =
+    useDeviceStragesFunctions();
+
+  const TargetIsBusy = (
+    <Snackbar
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      open={snackbarOpen}
+      autoHideDuration={3000}
+      onClose={handleSnackbarClose}
+    >
+      <Alert onClose={handleSnackbarClose} severity="error">
+        {snackbarMessage}
+      </Alert>
+    </Snackbar>
+  );
 
   return (
     <>
@@ -84,6 +100,7 @@ export const DeviceStrages: React.FC = () => {
           </List>
         </Grid>
       </Grid>
+      {TargetIsBusy}
     </>
   );
 };

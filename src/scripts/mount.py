@@ -22,9 +22,6 @@ def mount(disk, ro=False):
     MAPPING_GID = 1000
     uid = gid = str(os.geteuid())
 
-    # TODO: command not found に対処する
-    # -> 仮想環境を作成してもできなかった
-
     authorized = True  # False: add 'sudo' to command
     if os.geteuid():
         # args = [sys.executable] + sys.argv
@@ -75,6 +72,8 @@ def mount(disk, ro=False):
                 if not authorized:
                     _add_permission(cmd_rmdir)
                 subprocess.run(cmd_rmdir)
+            if e.returncode == 32:
+                return "ERROR target is busy."
             sys.exit(ExitStatus.failure)
 
     if not disk_is_mounted:

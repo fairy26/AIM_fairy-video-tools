@@ -11,7 +11,7 @@ import { ChildProcess, spawn } from 'child_process';
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
-const isPackaged: boolean = require('electron-is-packaged').isPackaged;
+// const isPackaged: boolean = require('electron-is-packaged').isPackaged;
 const childProcesses: ChildProcess[] = [];
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -121,10 +121,10 @@ const execPython = (window: BrowserWindow, message: any): void => {
   const args = message.message.split(' ');
   const scriptPath = getScriptPath();
 
-  window.webContents.send(
-    IpcChannelType.TO_RENDERER_STDERR,
-    `${__dirname}: ${isPackaged} & ${guessPackaged()}`
-  );
+  // window.webContents.send(
+  //   IpcChannelType.TO_RENDERER_STDERR,
+  //   `${__dirname}: ${isPackaged} & ${guessPackaged()}`
+  // );
 
   if (guessPackaged()) {
     console.log(scriptPath);

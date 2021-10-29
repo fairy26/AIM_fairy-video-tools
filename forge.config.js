@@ -46,9 +46,6 @@ module.exports = {
     ],
   ],
   hooks: {
-    postStart: async (forgeConfig, options) => {
-      console.log(options);
-    },
     postPackage: async (forgeConfig, { outputPaths }) => {
       const distPath = path.resolve(__dirname, 'dist');
       const pyScriptName = 'main';

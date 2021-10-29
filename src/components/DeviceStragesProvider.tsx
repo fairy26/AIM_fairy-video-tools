@@ -45,6 +45,17 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     [mountPoints]
   );
   const [readOnlyFlags, setReadOnlyFlags] = useState<boolean[]>(Array(10).fill(true));
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+
+  const handleSnackbarOpen = useCallback((message: string): void => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  }, []);
+
+  const handleSnackbarClose = useCallback((): void => {
+    setSnackbarOpen(false);
+  }, []);
 
   const handleReadOnly =
     (index: number) =>
@@ -80,7 +91,9 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         break;
       case 'mount':
       case 'unmount':
-        updateOneMountPoint(message);
+        message.startsWith('ERROR')
+          ? handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '))
+          : updateOneMountPoint(message);
         break;
       default:
         console.log('python-shell send unexpected messages');
@@ -284,6 +297,9 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         getDisksList,
         readOnlyFlags,
         handleReadOnly,
+        snackbarOpen,
+        handleSnackbarClose,
+        snackbarMessage,
         percentage,
         showProgress,
         remaining,

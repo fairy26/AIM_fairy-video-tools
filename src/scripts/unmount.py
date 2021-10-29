@@ -2,6 +2,8 @@ import os
 import subprocess
 import sys
 
+from exitstatus import ExitStatus
+
 
 def _add_permission(cmd):
     cmd.insert(0, "sudo")
@@ -30,7 +32,12 @@ def unmount(disk):
                 cmd = ["umount", target]
                 if not authorized:
                     _add_permission(cmd)
-                subprocess.run(cmd, check=True)
+                try:
+                    subprocess.run(cmd, check=True)
+                except subprocess.CalledProcessError as e:
+                    if e.returncode == 32:
+                        return "ERROR target is busy."
+                    sys.exit(ExitStatus.failure)
                 if os.path.exists(target):
                     # os.rmdir(target)
                     cmd_rmdir = ["rmdir", target]
