@@ -1,18 +1,15 @@
 import React from 'react';
 
-import { Button, Grid, LinearProgress, TextareaAutosize, Typography } from '@mui/material';
+import { Button, Grid, TextareaAutosize, Typography } from '@mui/material';
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
 import { AlertSnackbar } from './AlertSnackbar';
 import { AlertDialog } from './AlertDialog';
 import { CopyTargetSelect } from './CopyTargetSelect';
+import { GriddedPbar } from './GriddedPbar';
 
 export const DiskCopy: React.FC = () => {
   const {
-    percentage,
     showProgress,
-    remaining,
-    endTime,
-    killBySIGINT,
     source,
     sources,
     handleSourceChange,
@@ -75,23 +72,7 @@ export const DiskCopy: React.FC = () => {
 
         {showProgress && (
           <Grid item xs>
-            <Grid container direction="column" spacing={0.5}>
-              <Grid item xs>
-                <LinearProgress variant="determinate" value={percentage} />
-              </Grid>
-
-              <Grid item xs zeroMinWidth sx={{ marginLeft: 'auto' }}>
-                <Typography variant="body2" color="text.secondary" noWrap>
-                  {remaining ? `${remaining} (${endTime})` : ' '}
-                </Typography>
-              </Grid>
-            </Grid>
-
-            <Grid item xs="auto" sx={{ marginLeft: 'auto' }}>
-              <Button variant="outlined" onClick={killBySIGINT} color="error">
-                中断
-              </Button>
-            </Grid>
+            <GriddedPbar />
           </Grid>
         )}
       </Grid>
