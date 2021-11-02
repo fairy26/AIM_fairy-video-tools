@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { AlertSnackbar } from './AlertSnackbar';
 
 export const DiskCopy: React.FC = () => {
   const {
@@ -128,6 +129,7 @@ export const DiskCopy: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <AlertSnackbar />
     </>
   );
 };

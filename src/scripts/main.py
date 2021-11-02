@@ -96,6 +96,12 @@ if __name__ == "__main__":
             send("コピー先のHDDにパーティションがありません。フォーマットしますか？", file=sys.stderr, prefix="ALERT")
         elif not dest.formatted and dest.partition.isblank:
             send("コピー先のHDDがフォーマットされていません。フォーマットしますか？", file=sys.stderr, prefix="ALERT")
+        elif not dest.partition.binded:
+            send("コピー先の実行権限がありません。マウントし直してください。", file=sys.stderr, prefix="ERROR")
+        elif dest.partition.readonly:
+            send("コピー先をRWでマウントし直してください。", file=sys.stderr, prefix="ERROR")
+        elif not src.partition.readonly:
+            send("コピー元をROでマウントし直してください。", file=sys.stderr, prefix="ERROR")
         else:
             send(f"{args.path[0]} {args.path[1]}", file=sys.stderr, prefix="OK")
 

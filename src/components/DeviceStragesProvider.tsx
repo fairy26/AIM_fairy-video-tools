@@ -192,6 +192,9 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
       case 'ALERT':
         setAlertDialogContent(messages.join(' '));
         break;
+      case 'ERROR':
+        handleSnackbarOpen(messages.join(' '));
+        break;
       case 'OK':
         handleCopy(messages[0], messages[1]);
         break;

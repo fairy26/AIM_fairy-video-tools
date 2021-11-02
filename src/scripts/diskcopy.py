@@ -109,9 +109,14 @@ def diskcopy(src, dest, includes=None, excludes=None, dry_run=True, quiet=False,
                 if dry_run:
                     logger.info(f"shutil.copy({src_path}, {dest_path})")
                 else:
-                    shutil.copy2(src_path, dest_path)
-                    pbar.update(node.size)
-                    logger.info(f"(copy) {src_path}")
+                    try:
+                        shutil.copy2(src_path, dest_path)
+                    except PermissionError as e:
+                        logger.error(f"(failed) Permission denied")
+                        sys.exit(ExitStatus.failure)
+                    else:
+                        pbar.update(node.size)
+                        logger.info(f"(copy) {src_path}")
 
     if not dry_run:
         pbar.close()
