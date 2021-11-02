@@ -65,12 +65,15 @@ def check_blank(mountpoint: str) -> bool:
     return avifiles == []
 
 
-def lsblk_to_dict() -> List[dict]:
+def lsblk_to_dict() -> Optional[List[dict]]:
     """run `$ lsblk` and return device information"""
     cmd = ["lsblk", "-e", "7,259", "-Jo", "PATH,SERIAL,MOUNTPOINT,LABEL,FSTYPE"]
     cp = subprocess.run(cmd, stdout=PIPE, check=True)
     lsblk_output = cp.stdout.decode()
-    return json.loads(lsblk_output)["blockdevices"]
+    if lsblk_output == "":
+        return None
+    else:
+        return json.loads(lsblk_output)["blockdevices"]
 
 
 def proc_mounts() -> List[str]:
@@ -150,6 +153,8 @@ def get_details(disks: List[Optional[Disk]]) -> List[Optional[Disk]]:
 
     # check wether disk is formatted and is blank
     lsblk_dict_list = lsblk_to_dict()
+    if lsblk_dict_list is None:
+        return disks
 
     for device in lsblk_dict_list:
         if device["serial"] is not None:
@@ -305,7 +310,11 @@ def apply_format(disk: Optional[Disk]):
     if disk is None:
         return
 
-    for device in lsblk_to_dict():
+    lsblk_dict_list = lsblk_to_dict()
+    if lsblk_dict_list is None:
+        return
+
+    for device in lsblk_dict:
         done = update_partition(disk, device)
         if done:
             return
