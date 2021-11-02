@@ -1,17 +1,10 @@
 import React from 'react';
 
-import {
-  Autocomplete,
-  Button,
-  Grid,
-  LinearProgress,
-  TextareaAutosize,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Button, Grid, LinearProgress, TextareaAutosize, Typography } from '@mui/material';
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
 import { AlertSnackbar } from './AlertSnackbar';
 import { AlertDialog } from './AlertDialog';
+import { CopyTargetSelect } from './CopyTargetSelect';
 
 export const DiskCopy: React.FC = () => {
   const {
@@ -37,6 +30,16 @@ export const DiskCopy: React.FC = () => {
     }
   }, [logg]);
 
+  const HandleCopyButton = (
+    <Button
+      variant="outlined"
+      onClick={handleCopycheck(source, destination)}
+      disabled={source == null || destination == null}
+    >
+      実行
+    </Button>
+  );
+
   return (
     <>
       <Grid container spacing={2} justifyContent="center" alignItems="center">
@@ -47,42 +50,32 @@ export const DiskCopy: React.FC = () => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Autocomplete
-            disablePortal
-            id="original"
-            value={source}
-            onChange={handleSourceChange}
+          <CopyTargetSelect
+            label="コピー元"
+            select={source}
+            except={destination}
             options={sources}
-            getOptionDisabled={(option) => option === 'empty' || option === destination}
-            renderInput={(params) => <TextField {...params} label="コピー元" />}
+            handleChange={handleSourceChange}
           />
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Autocomplete
-            disablePortal
-            id="target"
-            value={destination}
-            onChange={handleDestinationChange}
+          <CopyTargetSelect
+            label="コピー先"
+            select={destination}
+            except={source}
             options={destinations}
-            getOptionDisabled={(option) => option === 'empty' || option === source}
-            renderInput={(params) => <TextField {...params} label="コピー先" />}
+            handleChange={handleDestinationChange}
           />
         </Grid>
 
         <Grid item xs={12} sx={{ marginLeft: 'auto' }}>
-          <Button
-            variant="outlined"
-            onClick={handleCopycheck(source, destination)}
-            disabled={source == null || destination == null}
-          >
-            実行
-          </Button>
+          {HandleCopyButton}
         </Grid>
 
         {showProgress && (
-          <>
-            <Grid item xs container direction="column" spacing={0.5}>
+          <Grid item xs>
+            <Grid container direction="column" spacing={0.5}>
               <Grid item xs>
                 <LinearProgress variant="determinate" value={percentage} />
               </Grid>
@@ -99,7 +92,7 @@ export const DiskCopy: React.FC = () => {
                 中断
               </Button>
             </Grid>
-          </>
+          </Grid>
         )}
       </Grid>
 
