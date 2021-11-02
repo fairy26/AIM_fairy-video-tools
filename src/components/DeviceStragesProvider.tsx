@@ -281,27 +281,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
     progressOff();
   }, []);
 
-  const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false);
   const [alertDialogContent, setAlertDialogContent] = useState<string>('');
-
-  const handleAlertDialogClose = () => {
-    setAlertDialogOpen(false);
-    setAlertDialogContent('');
-  };
-
-  const handleAgree = () => {
-    handleCopyFormat(source, destination);
-    handleAlertDialogClose();
-  };
-
-  const handleDisagree = () => {
-    progressOff();
-    handleAlertDialogClose();
-  };
-
-  const handleAlertDialogOpen = useEffect(() => {
-    alertDialogContent && setAlertDialogOpen(true);
-  }, [alertDialogContent]);
 
   return (
     <DeviceStragesCtx.Provider
@@ -330,10 +310,10 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         handleDestinationChange,
         handleCopycheck,
         logg,
-        alertDialogOpen,
-        handleAgree,
-        handleDisagree,
         alertDialogContent,
+        setAlertDialogContent,
+        progressOff,
+        handleCopyFormat,
       }}
     >
       {children}

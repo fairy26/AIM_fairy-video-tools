@@ -9,8 +9,6 @@ import {
   Avatar,
   Grid,
   IconButton,
-  Snackbar,
-  Alert,
 } from '@mui/material';
 import { PowerSettingsNewRounded as PowerSettingsNewRoundedIcon } from '@mui/icons-material';
 

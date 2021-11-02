@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
   Autocomplete,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
   Grid,
   LinearProgress,
   TextareaAutosize,
@@ -15,6 +11,7 @@ import {
 } from '@mui/material';
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
 import { AlertSnackbar } from './AlertSnackbar';
+import { AlertDialog } from './AlertDialog';
 
 export const DiskCopy: React.FC = () => {
   const {
@@ -31,10 +28,6 @@ export const DiskCopy: React.FC = () => {
     handleDestinationChange,
     handleCopycheck,
     logg,
-    alertDialogOpen,
-    handleAgree,
-    handleDisagree,
-    alertDialogContent,
   } = useDeviceStragesFunctions();
 
   const scrollRef = React.useRef(null);
@@ -112,23 +105,7 @@ export const DiskCopy: React.FC = () => {
 
       <TextareaAutosize ref={scrollRef} maxRows={20} value={logg} disabled />
 
-      <Dialog
-        open={alertDialogOpen}
-        onClose={handleDisagree}
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">{alertDialogContent}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={handleAgree}>
-            はい
-          </Button>
-          <Button variant="outlined" onClick={handleDisagree} autoFocus color="error">
-            キャンセル
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AlertDialog {...{ source, destination }} />
       <AlertSnackbar />
     </>
   );
