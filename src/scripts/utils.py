@@ -314,7 +314,7 @@ def apply_format(disk: Optional[Disk]):
     if lsblk_dict_list is None:
         return
 
-    for device in lsblk_dict:
+    for device in lsblk_dict_list:
         done = update_partition(disk, device)
         if done:
             return

@@ -5,8 +5,8 @@ export const useModeFunctions = () => useContext(ModeCtx);
 
 export const ModeProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [modeIs, setModes] = useState<Object>({
-    device_strages: false,
-    disk_copy: true,
+    device_strages: true,
+    disk_copy: false,
   });
 
   const handleMode = (mode: string) => (event: React.KeyboardEvent | React.MouseEvent) => {

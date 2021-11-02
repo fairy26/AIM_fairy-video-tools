@@ -45,17 +45,12 @@ if __name__ == "__main__":
     parser.add_argument("--format", action="store_true")
     args = parser.parse_args()
 
-    # with resources.path("data", "log_config.json") as log_config:
-    #     with open(log_config, encoding="utf-8") as f:
-    #         conf = json.load(f)
-    #         if args.quiet:
-    #             conf["root"]["level"] = "ERROR"
-    #         config.dictConfig(conf)
-    # with open("src/scripts/data/log_config.json", encoding="utf-8") as f:
-    #     conf = json.load(f)
-    #     if args.quiet:
-    #         conf["root"]["level"] = "ERROR"
-    #     config.dictConfig(conf)
+    with resources.path("data", "log_config.json") as log_config:
+        with open(log_config, encoding="utf-8") as f:
+            conf = json.load(f)
+            if args.quiet:
+                conf["root"]["level"] = "ERROR"
+            config.dictConfig(conf)
 
     disks = get_located_disks()
 
