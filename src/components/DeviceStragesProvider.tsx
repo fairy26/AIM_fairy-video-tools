@@ -151,7 +151,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         (name: string, index: number) =>
           name !== 'not_mounted' && name !== 'empty' && readOnlyFlags[index] && name !== destination
       ),
-    [mountPoints]
+    [mountPoints, readOnlyFlags, destination]
   );
 
   const destinations = useMemo<string[]>(
@@ -162,7 +162,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
           (name: string, index: number) =>
             name !== 'empty' && !readOnlyFlags[index] && name !== source
         ),
-    [mountPoints]
+    [disks, mountPoints, readOnlyFlags, source]
   );
 
   const [showProgress, setShowProgress] = useState<boolean>(false);
