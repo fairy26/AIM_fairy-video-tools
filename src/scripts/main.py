@@ -4,6 +4,7 @@ import json
 from importlib import resources
 from logging import config, getLogger
 
+from eject import eject
 from mount import mount
 from utils import (
     apply_format,
@@ -43,6 +44,7 @@ if __name__ == "__main__":
     parser.add_argument("--copycheck", action="store_true")
     parser.add_argument("--copy", action="store_true")
     parser.add_argument("--format", action="store_true")
+    parser.add_argument("--eject", action="store_true")
     args = parser.parse_args()
 
     with resources.path("data", "log_config.json") as log_config:
@@ -53,6 +55,18 @@ if __name__ == "__main__":
             config.dictConfig(conf)
 
     disks = get_located_disks()
+
+    if args.eject:
+        target = search_instance(disks, args.path[0])
+        status = eject(target.path)
+
+        if status.startswith("ERROR"):
+            send(status, prefix="eject")
+        else:
+            disks = get_located_disks()  # reloard disks
+            send(get_disk_list(disks), prefix="disk")
+            send(get_mountpoint_list(disks), prefix="mountpoint")
+            send(get_access_list(disks), prefix="access")
 
     if args.mount:
         target = search_instance(disks, args.path[0])

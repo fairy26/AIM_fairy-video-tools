@@ -20,8 +20,15 @@ import { PowerOnBadge } from './PowerOnBadge';
 import { ListedMountButton } from './ListedMountButton';
 
 export const DeviceStrages: React.FC = () => {
-  const { disks, mounted, mountPoints, snackbarOpen, handleSnackbarClose, snackbarMessage } =
-    useDeviceStragesFunctions();
+  const {
+    disks,
+    mounted,
+    mountPoints,
+    snackbarOpen,
+    handleSnackbarClose,
+    snackbarMessage,
+    handleEject,
+  } = useDeviceStragesFunctions();
 
   const TargetIsBusy = (
     <Snackbar
@@ -75,7 +82,7 @@ export const DeviceStrages: React.FC = () => {
                       invisible={isEmpty}
                     >
                       <Avatar sx={{ width: 34, height: 34 }}>
-                        <IconButton color="inherit">
+                        <IconButton color="inherit" onClick={handleEject(disk)} disabled={isEmpty}>
                           <PowerSettingsNewRoundedIcon />
                         </IconButton>
                       </Avatar>

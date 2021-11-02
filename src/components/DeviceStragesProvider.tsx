@@ -95,6 +95,10 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
           ? handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '))
           : updateOneMountPoint(message);
         break;
+      case 'eject':
+        message.startsWith('ERROR') &&
+          handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '));
+        break;
       default:
         console.log('python-shell send unexpected messages');
     }
@@ -116,6 +120,15 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
 
     send('--check');
   }, []);
+
+  const handleEject = useCallback(
+    (disk: string) => (): void => {
+      console.log('R: clicked, eject', disk);
+
+      send(`--eject --path ${disk}`);
+    },
+    []
+  );
 
   // --------------------------------------------------------------
 
@@ -300,6 +313,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         snackbarOpen,
         handleSnackbarClose,
         snackbarMessage,
+        handleEject,
         percentage,
         showProgress,
         remaining,
