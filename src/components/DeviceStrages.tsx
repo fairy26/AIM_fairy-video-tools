@@ -18,30 +18,10 @@ import { useDeviceStragesFunctions } from './DeviceStragesProvider';
 import { ReloadDisksButton } from './ReloadDisksButton';
 import { PowerOnBadge } from './PowerOnBadge';
 import { ListedMountButton } from './ListedMountButton';
+import { AlertSnackbar } from './AlertSnackbar';
 
 export const DeviceStrages: React.FC = () => {
-  const {
-    disks,
-    mounted,
-    mountPoints,
-    snackbarOpen,
-    handleSnackbarClose,
-    snackbarMessage,
-    handleEject,
-  } = useDeviceStragesFunctions();
-
-  const TargetIsBusy = (
-    <Snackbar
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      open={snackbarOpen}
-      autoHideDuration={3000}
-      onClose={handleSnackbarClose}
-    >
-      <Alert onClose={handleSnackbarClose} severity="error">
-        {snackbarMessage}
-      </Alert>
-    </Snackbar>
-  );
+  const { disks, mounted, mountPoints, handleEject } = useDeviceStragesFunctions();
 
   return (
     <>
@@ -107,7 +87,7 @@ export const DeviceStrages: React.FC = () => {
           </List>
         </Grid>
       </Grid>
-      {TargetIsBusy}
+      <AlertSnackbar />
     </>
   );
 };
