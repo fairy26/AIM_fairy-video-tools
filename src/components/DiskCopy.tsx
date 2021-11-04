@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Button, Grid, Typography } from '@mui/material';
 
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 import { AlertSnackbar } from './AlertSnackbar';
 import { AlertDialog } from './AlertDialog';
 import { CopyTargetSelect } from './CopyTargetSelect';
@@ -19,7 +19,7 @@ export const DiskCopy: React.FC = () => {
     destinations,
     handleDestinationChange,
     handleCopycheck,
-  } = useDeviceStragesFunctions();
+  } = useFunctions();
 
   const HandleCopyButton = (
     <Button

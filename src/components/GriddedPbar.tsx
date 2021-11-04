@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { Button, Grid, LinearProgress, Typography } from '@mui/material';
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 
 export const GriddedPbar: React.VFC = () => {
-  const { percentage, remaining, endTime, killBySIGINT } = useDeviceStragesFunctions();
+  const { percentage, remaining, endTime, killBySIGINT } = useFunctions();
 
   return (
     <>

@@ -12,14 +12,14 @@ import {
 } from '@mui/material';
 import { PowerSettingsNewRounded as PowerSettingsNewRoundedIcon } from '@mui/icons-material';
 
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 import { ReloadDisksButton } from './ReloadDisksButton';
 import { PowerOnBadge } from './PowerOnBadge';
 import { ListedMountButton } from './ListedMountButton';
 import { AlertSnackbar } from './AlertSnackbar';
 
 export const DeviceStrages: React.FC = () => {
-  const { disks, mounted, mountPoints, handleEject } = useDeviceStragesFunctions();
+  const { disks, mounted, mountPoints, handleEject } = useFunctions();
 
   return (
     <>

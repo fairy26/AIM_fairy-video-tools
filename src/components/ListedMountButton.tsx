@@ -3,7 +3,7 @@ import React from 'react';
 import { Button, Checkbox, FormControlLabel } from '@mui/material';
 import { PlayCircle as PlayCircleIcon, StopCircle as StopCircleIcon } from '@mui/icons-material';
 
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 
 type Props = {
   isMounted: boolean;
@@ -11,7 +11,7 @@ type Props = {
 };
 
 export const ListedMountButton: React.VFC<Props> = ({ isMounted, index }) => {
-  const { readOnlyFlags, handleReadOnly, handleMount } = useDeviceStragesFunctions();
+  const { readOnlyFlags, handleReadOnly, handleMount } = useFunctions();
 
   return (
     <>

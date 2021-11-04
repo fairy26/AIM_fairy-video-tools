@@ -18,7 +18,7 @@ import { Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from '@mui/icons-mat
 import { ModeProvider } from './components/ModeProvider';
 import { DrawerListItems } from './components/DrawerListItems';
 import { MainComponent } from './components/MainComponent';
-import { DeviceStragesProvider } from './components/DeviceStragesProvider';
+import { MainProvider } from './components/MainProvider';
 
 const drawerWidth = 240;
 
@@ -144,9 +144,9 @@ export default function DashboardContent() {
                 flexDirection: 'column',
               }}
             >
-              <DeviceStragesProvider>
+              <MainProvider>
                 <MainComponent />
-              </DeviceStragesProvider>
+              </MainProvider>
             </Paper>
           </Box>
         </ModeProvider>

@@ -1,17 +1,9 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-} from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect, useMemo } from 'react';
 
 import { ContextBridgeApi } from '../preload';
 
-const DeviceStragesCtx = createContext(null);
-export const useDeviceStragesFunctions = () => useContext(DeviceStragesCtx);
+const MainCtx = createContext(null);
+export const useFunctions = () => useContext(MainCtx);
 
 const strToArray = (str: string): string[] => str.slice(1, -1).split(',');
 const removeSingleQuote = (str: string): string => str.replace(/'/g, '');
@@ -26,7 +18,7 @@ const send = async (arg: string) => {
   console.log('R: sendToMainProcess ', result);
 };
 
-export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: any) => {
+export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   useEffect(() => {
     console.log('R: only one after initial render');
 
@@ -284,7 +276,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
   const [alertDialogContent, setAlertDialogContent] = useState<string>('');
 
   return (
-    <DeviceStragesCtx.Provider
+    <MainCtx.Provider
       value={{
         disks,
         mountPoints,
@@ -317,6 +309,6 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
       }}
     >
       {children}
-    </DeviceStragesCtx.Provider>
+    </MainCtx.Provider>
   );
 };

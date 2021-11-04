@@ -2,10 +2,10 @@ import React from 'react';
 
 import { Box, List, ListItemText, Paper } from '@mui/material';
 
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 
 export const Logger: React.VFC = () => {
-  const { logs } = useDeviceStragesFunctions();
+  const { logs } = useFunctions();
   const scrollRef = React.useRef(null);
 
   React.useEffect(() => {

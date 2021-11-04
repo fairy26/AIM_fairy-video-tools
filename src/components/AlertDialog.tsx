@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 
 type Props = {
   source: string;
@@ -10,7 +10,7 @@ type Props = {
 
 export const AlertDialog: React.VFC<Props> = ({ source, destination }) => {
   const { alertDialogContent, setAlertDialogContent, handleCopyFormat, progressOff } =
-    useDeviceStragesFunctions();
+    useFunctions();
 
   const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false);
 

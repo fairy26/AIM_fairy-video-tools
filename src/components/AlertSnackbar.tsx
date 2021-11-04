@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { Alert, Snackbar } from '@mui/material';
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 
 export const AlertSnackbar: React.VFC = () => {
-  const { snackbarOpen, handleSnackbarClose, snackbarMessage } = useDeviceStragesFunctions();
+  const { snackbarOpen, handleSnackbarClose, snackbarMessage } = useFunctions();
 
   return (
     <Snackbar
