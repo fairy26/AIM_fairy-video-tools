@@ -1,11 +1,13 @@
 import React from 'react';
 
-import { Button, Grid, TextareaAutosize, Typography } from '@mui/material';
+import { Button, Grid, Typography } from '@mui/material';
+
 import { useDeviceStragesFunctions } from './DeviceStragesProvider';
 import { AlertSnackbar } from './AlertSnackbar';
 import { AlertDialog } from './AlertDialog';
 import { CopyTargetSelect } from './CopyTargetSelect';
 import { GriddedPbar } from './GriddedPbar';
+import { Logger } from './Logger';
 
 export const DiskCopy: React.FC = () => {
   const {
@@ -17,15 +19,7 @@ export const DiskCopy: React.FC = () => {
     destinations,
     handleDestinationChange,
     handleCopycheck,
-    logg,
   } = useDeviceStragesFunctions();
-
-  const scrollRef = React.useRef(null);
-  React.useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [logg]);
 
   const HandleCopyButton = (
     <Button
@@ -77,7 +71,7 @@ export const DiskCopy: React.FC = () => {
         )}
       </Grid>
 
-      <TextareaAutosize ref={scrollRef} maxRows={20} value={logg} disabled />
+      <Logger />
 
       <AlertDialog {...{ source, destination }} />
       <AlertSnackbar />

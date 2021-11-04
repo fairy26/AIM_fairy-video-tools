@@ -169,10 +169,10 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
   const [percentage, setPercentage] = useState<number>(0);
   const [remaining, setRemaining] = useState<string>('');
   const [endTime, setEndTime] = useState<string>('');
-  const [logg, setLogg] = useState<string>('');
+  const [logs, setLogs] = useState<string[]>([]);
 
   const progressOn = useCallback((): void => {
-    setLogg('');
+    setLogs([]);
     setShowProgress(true);
   }, []);
 
@@ -243,7 +243,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
       setRemaining(newRemaining);
       setEndTime(newEndTime);
     } else {
-      setLogg((prev) => `${prev}${message}\n`);
+      setLogs((prev) => [...prev, arg]);
     }
   };
 
@@ -309,7 +309,7 @@ export const DeviceStragesProvider: React.FC<React.ReactNode> = ({ children }: a
         destinations,
         handleDestinationChange,
         handleCopycheck,
-        logg,
+        logs,
         alertDialogContent,
         setAlertDialogContent,
         progressOff,
