@@ -14,6 +14,7 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 const childProcesses: ChildProcess[] = [];
+let monitoringPID: number | null = null;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -51,7 +52,9 @@ const createWindow = (): void => {
     ipcMain.handle(IpcChannelType.TO_MAIN, (event, message) => {
       console.log('M: IpcChannelType.TO_MAIN ', message);
 
-      message.message === 'SIGINT' ? killChildProcesses('SIGINT') : execPython(mainWindow, message);
+      message.message === 'SIGINT'
+        ? killChildProcesses('SIGINT', monitoringPID)
+        : execPython(mainWindow, message);
 
       return 'M: pong';
     });
@@ -106,8 +109,9 @@ const getScriptPath = () => {
   return path.join(__dirname, PY_DIST, PY_MODULE);
 };
 
-const killChildProcesses = (signal?: string) => {
+const killChildProcesses = (signal?: string, excludePID?: number | null) => {
   childProcesses.forEach((cprocess, index) => {
+    if (excludePID && cprocess.pid === excludePID) return;
     console.log(`kill ${cprocess.pid}(${cprocess.exitCode})`);
     try {
       signal ? process.kill(-cprocess.pid, signal) : process.kill(-cprocess.pid);
@@ -128,9 +132,10 @@ const execPython = (window: BrowserWindow, message: any): void => {
   stderrSplitter.setEncoding('utf8');
 
   if (guessPackaged()) {
-    console.log(scriptPath);
     const pyps: ChildProcess = spawn(scriptPath, args, { detached: true });
     childProcesses.push(pyps);
+
+    if (args.includes('--monitor')) monitoringPID = pyps.pid;
 
     pyps.stdout.pipe(stdoutSplitter).on('data', (data: string) => {
       const stdout = data.toString();
@@ -139,7 +144,6 @@ const execPython = (window: BrowserWindow, message: any): void => {
 
     pyps.stderr.pipe(stderrSplitter).on('data', (data: string) => {
       const stderr = data.toString();
-      console.log(stderr);
       window.webContents.send(IpcChannelType.TO_RENDERER_STDERR, stderr);
     });
 
@@ -166,6 +170,8 @@ const execPython = (window: BrowserWindow, message: any): void => {
 
     const pyshell = new PythonShell(scriptPath, options);
     childProcesses.push(pyshell.childProcess);
+
+    if (args.includes('--monitor')) monitoringPID = pyshell.childProcess.pid;
 
     pyshell
       .on('message', (stdout: string) => {
