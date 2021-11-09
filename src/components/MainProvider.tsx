@@ -25,6 +25,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     api.onSendToRenderer(handleStdout);
     api.onSendToRendererInRealTime(handleStderr);
 
+    send('--check'); // 最初のcalllは機能しない
+    send('--monitor');
     send('--check');
 
     return api.removeOnSendToRenderers;
@@ -92,7 +94,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
           handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '));
         break;
       default:
-        console.log('python-shell send unexpected messages');
+        break;
     }
   };
 

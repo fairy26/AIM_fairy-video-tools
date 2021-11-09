@@ -1,8 +1,10 @@
 import argparse
-import sys
 import json
+import sys
 from importlib import resources
-from logging import config, getLogger
+from logging import config
+
+import pyudev
 
 from eject import eject
 from mount import mount
@@ -27,6 +29,29 @@ def send(message, file=sys.stdout, prefix=None):
     file.flush()
 
 
+def reload():
+    disks = get_located_disks()
+    send(get_disk_list(disks), prefix="disk")
+    send(get_mountpoint_list(disks), prefix="mountpoint")
+    send(get_access_list(disks), prefix="access")
+
+
+def monitoring():
+
+    context = pyudev.Context()
+    monitor = pyudev.Monitor.from_netlink(context)
+
+    try:
+        monitor.start()
+
+        for device in iter(monitor.poll, None):
+            if device.device_type in {"disk", "partition"}:
+                reload()
+
+    except KeyboardInterrupt:
+        return
+
+
 if __name__ == "__main__":
 
     # if os.geteuid():
@@ -45,6 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("--copy", action="store_true")
     parser.add_argument("--format", action="store_true")
     parser.add_argument("--eject", action="store_true")
+    parser.add_argument("--monitor", action="store_true")
     args = parser.parse_args()
 
     with resources.path("data", "log_config.json") as log_config:
@@ -56,6 +82,9 @@ if __name__ == "__main__":
 
     disks = get_located_disks()
 
+    if args.monitor:
+        monitoring()
+
     if args.eject:
         target = search_instance(disks, args.path[0])
         status = eject(target.path)
@@ -63,10 +92,7 @@ if __name__ == "__main__":
         if status.startswith("ERROR"):
             send(status, prefix="eject")
         else:
-            disks = get_located_disks()  # reloard disks
-            send(get_disk_list(disks), prefix="disk")
-            send(get_mountpoint_list(disks), prefix="mountpoint")
-            send(get_access_list(disks), prefix="access")
+            reload()
 
     if args.mount:
         target = search_instance(disks, args.path[0])
@@ -83,9 +109,7 @@ if __name__ == "__main__":
         send(status, prefix="unmount")
 
     if args.check:
-        send(get_disk_list(disks), prefix="disk")
-        send(get_mountpoint_list(disks), prefix="mountpoint")
-        send(get_access_list(disks), prefix="access")
+        reload()
 
     if args.copycheck:
 
@@ -120,6 +144,7 @@ if __name__ == "__main__":
         if dest.partition is not None and not dest.partition.mounted:
             mount(disk=dest.partition.path, ro=False)
             apply_mount(disk=dest)
+            reload()
 
         diskcopy(
             src=src.get_avail_path(),
