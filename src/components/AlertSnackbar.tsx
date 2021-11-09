@@ -8,6 +8,7 @@ export const AlertSnackbar: React.VFC = () => {
 
   return (
     <Snackbar
+      key={snackbarMessage}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       open={snackbarOpen}
       autoHideDuration={3000}
