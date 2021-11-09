@@ -81,6 +81,15 @@ def proc_mounts() -> List[str]:
         return f.readlines()
 
 
+def get_port(string: str) -> tuple[int, Optional[str]]:
+    PORT = ["2\.1", "2\.2", "2\.3", "2\.4", "3", "4", "1\.1", "1\.2", "1\.3", "1\.4"]
+    for i, port in enumerate(PORT):
+        m = re.search(f"(?<=:)\d\.{port}", string)
+        if m:
+            return i, m.group(0)
+    return -1, None
+
+
 def check_mounts(disk: Optional[Disk]) -> Optional[Disk]:
     if disk is None:
         return None
@@ -186,28 +195,23 @@ def get_details(disks: List[Optional[Disk]]) -> List[Optional[Disk]]:
 def get_located_disks() -> List[Optional[Disk]]:
     """construct disks"""
 
-    PORT = ["2\.1", "2\.2", "2\.3", "2\.4", "3", "4", "1\.1", "1\.2", "1\.3", "1\.4"]
-
     disks: List[Optional[Disk]] = [None] * 10
 
     with os.scandir("/dev/disk/by-path") as it:
         for entry in it:
             entry_path = os.path.realpath(entry.path)
-            for i, port in enumerate(PORT):
-                m = re.search(f":\d\.{port}:", entry.name)
-                if m:
-                    if disks[i] is None:
-                        disks[i] = Disk(position=i + 1, port=m.group(0))
+            i, port = get_port(entry.name)
+            if port is not None:
+                if disks[i] is None:
+                    disks[i] = Disk(position=i + 1, port=port)
 
-                    if entry.name.endswith("-part1"):
-                        if disks[i].partition is None:
-                            disks[i].partition = Partition(path=entry_path)
-                        else:
-                            disks[i].partition.path = entry_path
+                if entry.name.endswith("-part1"):
+                    if disks[i].partition is None:
+                        disks[i].partition = Partition(path=entry_path)
                     else:
-                        disks[i].path = entry_path
-
-                    break
+                        disks[i].partition.path = entry_path
+                else:
+                    disks[i].path = entry_path
 
     disks = get_details(disks)
 
@@ -230,7 +234,7 @@ def get_partition_list(disks: List[Optional[Disk]]) -> List[str]:
     for i, disk in enumerate(disks):
         if disk is not None:
             if disk.partition is not None:
-                partition_list[i] = disk.partition.path
+                partition_list[i] = disk.partition.path or "empty"
 
     return partition_list
 
