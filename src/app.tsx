@@ -5,11 +5,8 @@ import {
   CssBaseline,
   Box,
   Toolbar,
-  List,
-  Typography,
   Divider,
   IconButton,
-  Paper,
   Drawer as MuiDrawer,
 } from '@mui/material/';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
@@ -82,44 +79,20 @@ export default function DashboardContent() {
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-
-        <AppBar position="absolute" open={open}>
-          <Toolbar
-            sx={{
-              pr: '24px', // keep right padding when drawer closed
-            }}
-          >
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              sx={{
-                marginRight: '36px',
-                ...(open && { display: 'none' }),
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-              AI Medical Service
-            </Typography>
-          </Toolbar>
-        </AppBar>
-
         <ModeProvider>
           <Drawer variant="permanent" open={open}>
             <Toolbar
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
+                justifyContent: 'flex-start',
                 px: [1],
               }}
             >
-              <IconButton onClick={toggleDrawer}>
-                <ChevronLeftIcon />
-              </IconButton>
+              <IconButton
+                onClick={toggleDrawer}
+                children={open ? <ChevronLeftIcon /> : <MenuIcon />}
+              />
             </Toolbar>
             <Divider />
             <DrawerListItems />
@@ -135,19 +108,9 @@ export default function DashboardContent() {
               overflow: 'auto',
             }}
           >
-            <Toolbar />
-            <Paper
-              sx={{
-                margin: 2,
-                padding: 2,
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <MainProvider>
-                <MainComponent />
-              </MainProvider>
-            </Paper>
+            <MainProvider>
+              <MainComponent />
+            </MainProvider>
           </Box>
         </ModeProvider>
       </Box>
