@@ -8,6 +8,7 @@ type Props = {
   except: string;
   options: string[];
   handleChange: any;
+  disabled: boolean;
 };
 
 export const CopyTargetSelect: React.VFC<Props> = ({
@@ -16,6 +17,7 @@ export const CopyTargetSelect: React.VFC<Props> = ({
   except,
   options,
   handleChange,
+  disabled,
 }) => {
   return (
     <Autocomplete
@@ -26,6 +28,7 @@ export const CopyTargetSelect: React.VFC<Props> = ({
       options={options}
       getOptionDisabled={(option) => option === 'empty' || option === except}
       renderInput={(params) => <TextField {...params} label={label} />}
+      disabled={disabled}
     />
   );
 };

@@ -25,7 +25,7 @@ export const DiskCopy: React.FC = () => {
     <Button
       variant="outlined"
       onClick={handleCopycheck(source, destination)}
-      disabled={source == null || destination == null}
+      disabled={showProgress || source == null || destination == null}
     >
       実行
     </Button>
@@ -47,6 +47,7 @@ export const DiskCopy: React.FC = () => {
             except={destination}
             options={sources}
             handleChange={handleSourceChange}
+            disabled={showProgress}
           />
         </Grid>
 
@@ -57,6 +58,7 @@ export const DiskCopy: React.FC = () => {
             except={source}
             options={destinations}
             handleChange={handleDestinationChange}
+            disabled={showProgress}
           />
         </Grid>
 

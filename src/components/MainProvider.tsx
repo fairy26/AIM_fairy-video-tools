@@ -179,6 +179,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     setPercentage(0);
     setRemaining('');
     setEndTime('');
+    setSource(null);
+    setDestination(null);
   }, []);
 
   const handleStderr = (arg: string): void => {
@@ -245,8 +247,6 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
     send(`--copy --path ${src} ${dest}`);
     progressOn();
-    setSource(null);
-    setDestination(null);
   }, []);
 
   const handleCopyFormat = useCallback((src: string, dest: string) => {
@@ -254,8 +254,6 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
     send(`--copy --format --path ${src} ${dest}`);
     progressOn();
-    setSource(null);
-    setDestination(null);
   }, []);
 
   const handleCopycheck = useCallback(
