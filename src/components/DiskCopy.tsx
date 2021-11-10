@@ -64,11 +64,9 @@ export const DiskCopy: React.FC = () => {
           {HandleCopyButton}
         </Grid>
 
-        {showProgress && (
-          <Grid item xs>
-            <GriddedPbar />
-          </Grid>
-        )}
+        <Grid item xs sx={{ display: showProgress ? 'block' : 'none' }}>
+          <GriddedPbar />
+        </Grid>
       </Grid>
 
       <Logger />

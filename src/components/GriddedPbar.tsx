@@ -10,7 +10,10 @@ export const GriddedPbar: React.VFC = () => {
     <>
       <Grid container direction="column" spacing={0.5}>
         <Grid item xs>
-          <LinearProgress variant="determinate" value={percentage} />
+          <LinearProgress
+            variant={remaining ? 'determinate' : 'indeterminate'}
+            value={percentage}
+          />
         </Grid>
 
         <Grid item xs zeroMinWidth sx={{ marginLeft: 'auto' }}>
