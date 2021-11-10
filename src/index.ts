@@ -49,13 +49,14 @@ const createWindow = (): void => {
       contextIsolation: true,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
+    autoHideMenuBar: true,
   });
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // This event may be emitted before the 'did-finish-load' event.
   // Therefore, make function to add handler run before creating the window.
