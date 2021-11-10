@@ -27,7 +27,7 @@ export const DeviceStrages: React.FC = () => {
       const isMounted: boolean = mounted[index];
 
       return (
-        <ListItem key={index} sx={{ paddingY: '0' }}>
+        <ListItem key={`disk_${index}`} sx={{ paddingY: '0' }}>
           <ListItemAvatar>
             <PowerOnBadge
               overlap="circular"
@@ -68,7 +68,7 @@ export const DeviceStrages: React.FC = () => {
 
       return (
         <ListItem
-          key={index}
+          key={`button_${index}`}
           sx={{
             paddingY: '0',
             paddingRight: '0',

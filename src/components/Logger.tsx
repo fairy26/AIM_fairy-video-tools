@@ -19,8 +19,8 @@ export const Logger: React.VFC = () => {
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box ref={scrollRef} sx={{ maxHeight: 270, flexGrow: 1, overflowY: 'auto' }}>
           <List dense sx={{ paddingX: 2 }}>
-            {logs.map((line: string) => (
-              <ListItemText key={line} primary={line} />
+            {logs.map((line: string, index: number) => (
+              <ListItemText key={`log_${index}`} primary={line} />
             ))}
           </List>
         </Box>
