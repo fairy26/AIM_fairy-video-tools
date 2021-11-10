@@ -4,30 +4,36 @@ import { Button, Grid, LinearProgress, Typography } from '@mui/material';
 import { useFunctions } from './MainProvider';
 
 export const GriddedPbar: React.VFC = () => {
-  const { percentage, remaining, endTime, killBySIGINT } = useFunctions();
+  const { showProgress, percentage, remaining, endTime, killBySIGINT } = useFunctions();
 
   return (
-    <>
-      <Grid container direction="column" spacing={0.5}>
-        <Grid item xs>
-          <LinearProgress
-            variant={remaining ? 'determinate' : 'indeterminate'}
-            value={percentage}
-          />
-        </Grid>
+    <Grid
+      item
+      xs={12}
+      container
+      justifyContent="flex-end"
+      alignItems="flex-end"
+      spacing={1}
+      sx={{ display: showProgress ? 'block' : 'none' }}
+    >
+      <Grid item xs>
+        <LinearProgress variant={remaining ? 'determinate' : 'indeterminate'} value={percentage} />
 
-        <Grid item xs zeroMinWidth sx={{ marginLeft: 'auto' }}>
-          <Typography variant="body2" color="text.secondary" noWrap>
-            {remaining ? `${remaining} (${endTime})` : ' '}
-          </Typography>
-        </Grid>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          noWrap
+          sx={{ display: 'flex', justifyContent: 'flex-end' }}
+        >
+          {remaining ? `${remaining} (${endTime})` : ' '}
+        </Typography>
       </Grid>
 
-      <Grid item xs="auto" sx={{ marginLeft: 'auto' }}>
+      <Grid item xs="auto">
         <Button variant="outlined" onClick={killBySIGINT} color="error">
           中断
         </Button>
       </Grid>
-    </>
+    </Grid>
   );
 };

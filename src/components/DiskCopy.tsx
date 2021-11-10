@@ -21,7 +21,7 @@ export const DiskCopy: React.FC = () => {
     handleCopycheck,
   } = useFunctions();
 
-  const HandleCopyButton = (
+  const HandleCopyButton = () => (
     <Button
       variant="outlined"
       onClick={handleCopycheck(source, destination)}
@@ -30,7 +30,6 @@ export const DiskCopy: React.FC = () => {
       実行
     </Button>
   );
-
   return (
     <>
       <Grid container spacing={2} justifyContent="center" alignItems="center">
@@ -62,13 +61,11 @@ export const DiskCopy: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12} sx={{ marginLeft: 'auto' }}>
-          {HandleCopyButton}
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <HandleCopyButton />
         </Grid>
 
-        <Grid item xs sx={{ display: showProgress ? 'block' : 'none' }}>
-          <GriddedPbar />
-        </Grid>
+        <GriddedPbar />
       </Grid>
 
       <Logger />
