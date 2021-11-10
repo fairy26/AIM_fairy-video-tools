@@ -23,7 +23,7 @@ export const MainComponent = () => {
     <Paper
       sx={{
         margin: 2,
-        padding: 2,
+        padding: 4,
         display: 'flex',
         flexDirection: 'column',
       }}
