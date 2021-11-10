@@ -29,6 +29,16 @@ const getResourceDirectory = () => {
 };
 
 const createWindow = (): void => {
+  ipcMain.handle(IpcChannelType.TO_MAIN, (event, message) => {
+    console.log('M: IpcChannelType.TO_MAIN ', message);
+
+    message.message === 'SIGINT'
+      ? killChildProcesses('SIGINT', monitoringPID)
+      : execPython(mainWindow, message);
+
+    return 'M: pong';
+  });
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     height: 830,
@@ -47,18 +57,18 @@ const createWindow = (): void => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
+  // This event may be emitted before the 'did-finish-load' event.
+  // Therefore, make function to add handler run before creating the window.
   mainWindow.on('ready-to-show', () => {
-    mainWindow.webContents.send(IpcChannelType.TO_RENDERER, 'M: ping');
-    ipcMain.removeHandler(IpcChannelType.TO_MAIN);
-    ipcMain.handle(IpcChannelType.TO_MAIN, (event, message) => {
-      console.log('M: IpcChannelType.TO_MAIN ', message);
-
-      message.message === 'SIGINT'
-        ? killChildProcesses('SIGINT', monitoringPID)
-        : execPython(mainWindow, message);
-
-      return 'M: pong';
-    });
+    // mainWindow.webContents.send(IpcChannelType.TO_RENDERER, 'M: ping');
+    // ipcMain.removeHandler(IpcChannelType.TO_MAIN);
+    // ipcMain.handle(IpcChannelType.TO_MAIN, (event, message) => {
+    //   console.log('M: IpcChannelType.TO_MAIN ', message);
+    //   message.message === 'SIGINT'
+    //     ? killChildProcesses('SIGINT', monitoringPID)
+    //     : execPython(mainWindow, message);
+    //   return 'M: pong';
+    // });
   });
 };
 
