@@ -189,7 +189,6 @@ const execPython = (window: BrowserWindow, message: any): void => {
         window.webContents.send(IpcChannelType.TO_RENDERER, stdout);
       })
       .on('stderr', (stderr: string) => {
-        console.log(stderr);
         window.webContents.send(IpcChannelType.TO_RENDERER_STDERR, stderr);
       })
       .end((err, code, signal) => {

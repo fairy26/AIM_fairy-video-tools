@@ -25,7 +25,6 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     api.onSendToRenderer(handleStdout);
     api.onSendToRendererInRealTime(handleStderr);
 
-    send('--check'); // 最初のcalllは機能しない
     send('--monitor');
     send('--check');
 
@@ -93,7 +92,12 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         message.startsWith('ERROR') &&
           handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '));
         break;
+      case 'copy':
+        messages[0] === 'OK' && handleCopy(messages[1], messages[2]);
+        messages[0] === 'COMPLETED' && progressOff();
+        break;
       default:
+        setLogs((prev) => [...prev, arg]);
         break;
     }
   };
@@ -189,14 +193,9 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
       case 'ERROR':
         handleSnackbarOpen(messages.join(' '));
         break;
-      case 'OK':
-        handleCopy(messages[0], messages[1]);
-        break;
-      case 'COMPLETED':
-        progressOff();
-        break;
       default:
         updateProgress(arg);
+        break;
     }
   };
 

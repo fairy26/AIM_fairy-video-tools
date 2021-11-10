@@ -15,7 +15,7 @@
             "class": "logging.StreamHandler",
             "level": "INFO",
             "formatter": "simple",
-            "stream": "ext://sys.stderr"
+            "stream": "ext://sys.stdout"
         }
     },
 

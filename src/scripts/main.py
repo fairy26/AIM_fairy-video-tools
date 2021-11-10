@@ -5,6 +5,7 @@ from importlib import resources
 from logging import config
 
 import pyudev
+from exitstatus import ExitStatus
 
 from eject import eject
 from mount import mount
@@ -49,7 +50,7 @@ def monitoring():
                 reload()
 
     except KeyboardInterrupt:
-        return
+        sys.exit(ExitStatus.success)
 
 
 if __name__ == "__main__":
@@ -127,12 +128,12 @@ if __name__ == "__main__":
         elif not src.partition.readonly:
             send("コピー元をROでマウントし直してください。", file=sys.stderr, prefix="ERROR")
         else:
-            send(f"{args.path[0]} {args.path[1]}", file=sys.stderr, prefix="OK")
+            send(f"OK {args.path[0]} {args.path[1]}", prefix="copy")
 
     if args.copy:
         if len(args.path) != 2:
             # TODO: inform error to app
-            sys.exit(-1)
+            sys.exit(ExitStatus.failure)
 
         src = search_instance(disks, args.path[0])
         dest = search_instance(disks, args.path[1])
@@ -156,4 +157,4 @@ if __name__ == "__main__":
             simplebar=True,
         )
 
-        send("copy", file=sys.stderr, prefix="COMPLETED")
+        send("COMPLETED", prefix="copy")
