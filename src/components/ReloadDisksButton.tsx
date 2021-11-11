@@ -3,17 +3,13 @@ import React from 'react';
 import { Button } from '@mui/material';
 import { Cached as CashedIcon } from '@mui/icons-material';
 
-import { useDeviceStragesFunctions } from './DeviceStragesProvider';
+import { useFunctions } from './MainProvider';
 
 export const ReloadDisksButton = () => {
-  const { getDisksList } = useDeviceStragesFunctions();
+  const { getDisksList } = useFunctions();
   return (
-      <Button
-        variant='outlined'
-        startIcon={<CashedIcon />}
-        onClick={getDisksList}
-      >
-        Reload
-      </Button>
+    <Button variant="outlined" startIcon={<CashedIcon />} onClick={getDisksList}>
+      Reload
+    </Button>
   );
 };

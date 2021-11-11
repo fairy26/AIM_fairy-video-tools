@@ -1,33 +1,32 @@
-import React from "react";
+import React from 'react';
 
-import { Button, Checkbox, FormControlLabel, Switch } from "@mui/material";
-import {
-  PlayCircle as PlayCircleIcon,
-  StopCircle as StopCircleIcon,
-} from '@mui/icons-material';
+import { Button, Checkbox, FormControlLabel } from '@mui/material';
+import { PlayCircle as PlayCircleIcon, StopCircle as StopCircleIcon } from '@mui/icons-material';
 
-import { useDeviceStragesFunctions } from "./DeviceStragesProvider";
+import { useFunctions } from './MainProvider';
 
 type Props = {
-  isMounted: boolean,
-  index: number
+  isMounted: boolean;
+  index: number;
 };
 
-export const ListedMountButton: React.VFC<Props> = ({isMounted, index}) => {
-  const { readOnlyFlags, handleReadOnly, handleMount } = useDeviceStragesFunctions();
+export const ListedMountButton: React.VFC<Props> = ({ isMounted, index }) => {
+  const { readOnlyFlags, handleReadOnly, handleMount } = useFunctions();
 
-  return(
+  return (
     <>
       <FormControlLabel
         id={index.toString()}
-        label={readOnlyFlags[index] ? 'ro' : 'rw'}
+        label="RO"
         control={
           <Checkbox
             checked={readOnlyFlags[index]}
             disabled={isMounted}
             onChange={handleReadOnly(index)}
+            title="RO"
             inputProps={{ 'aria-label': 'Read Only' }}
-          />}
+          />
+        }
       />
       <Button
         variant="outlined"
@@ -39,4 +38,4 @@ export const ListedMountButton: React.VFC<Props> = ({isMounted, index}) => {
       </Button>
     </>
   );
-}
+};

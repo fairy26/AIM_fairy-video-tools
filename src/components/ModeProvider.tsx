@@ -1,15 +1,15 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from 'react';
 
 const ModeCtx = createContext(null);
 export const useModeFunctions = () => useContext(ModeCtx);
 
-export const ModeProvider: React.FC<React.ReactNode> = ({children}: any) => {
+export const ModeProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [modeIs, setModes] = useState<Object>({
     device_strages: true,
     disk_copy: false,
   });
 
-  const handleMode =(mode: string) => (event: React.KeyboardEvent | React.MouseEvent) => {
+  const handleMode = (mode: string) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
       event.type === 'keydown' &&
       ((event as React.KeyboardEvent).key === 'Tab' ||
@@ -18,11 +18,8 @@ export const ModeProvider: React.FC<React.ReactNode> = ({children}: any) => {
       return;
     }
 
-    setModes(Object.fromEntries(
-      Object.entries(modeIs)
-      .map(([key, _]) => [key, key===mode])
-    ))
-  }
+    setModes(Object.fromEntries(Object.entries(modeIs).map(([key, _]) => [key, key === mode])));
+  };
 
   return (
     <ModeCtx.Provider
@@ -31,7 +28,7 @@ export const ModeProvider: React.FC<React.ReactNode> = ({children}: any) => {
         handleMode,
       }}
     >
-      { children }
+      {children}
     </ModeCtx.Provider>
-  )
-}
+  );
+};

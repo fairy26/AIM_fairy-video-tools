@@ -18,52 +18,7 @@
   },
   "license": "MIT",
   "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "fairy-video-tools"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ],
-      "plugins": [
-        [
-          "@electron-forge/plugin-webpack",
-          {
-            "mainConfig": "./webpack.main.config.js",
-            "renderer": {
-              "config": "./webpack.renderer.config.js",
-              "entryPoints": [
-                {
-                  "html": "./src/index.html",
-                  "js": "./src/renderer.ts",
-                  "name": "main_window",
-                  "preload": {
-                    "js": "./src/preload.ts"
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      ]
-    }
+    "forge": "forge.config.js"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.61",
@@ -72,28 +27,31 @@
     "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
     "@electron-forge/maker-zip": "^6.0.0-beta.61",
     "@electron-forge/plugin-webpack": "6.0.0-beta.61",
-    "@types/react": "^17.0.24",
+    "@types/react": "^17.0.30",
     "@types/react-dom": "^17.0.9",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
     "@vercel/webpack-asset-relocator-loader": "1.7.0",
+    "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.0.0",
     "electron": "15.0.0",
     "eslint": "^7.6.0",
     "eslint-plugin-import": "^2.20.0",
     "fork-ts-checker-webpack-plugin": "^6.0.1",
+    "fs-extra": "^10.0.0",
     "node-loader": "^2.0.0",
     "style-loader": "^3.0.0",
     "ts-loader": "^9.2.2",
     "typescript": "^4.0.2"
   },
   "dependencies": {
-    "@emotion/react": "^11.4.1",
+    "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
-    "@mui/icons-material": "^5.0.1",
+    "@mui/icons-material": "^5.0.4",
     "@mui/material": "^5.0.0-rc.1",
+    "electron-is-packaged": "^1.0.2",
     "electron-squirrel-startup": "^1.0.0",
-    "python-shell": "^3.0.0",
+    "python-shell": "^3.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   }
