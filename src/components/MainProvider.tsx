@@ -1,4 +1,12 @@
-import React, { createContext, useState, useContext, useCallback, useEffect, useMemo } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react';
 
 import { ContextBridgeApi } from '../preload';
 
@@ -30,6 +38,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
     return api.removeOnSendToRenderers;
   }, []);
+
+  // disk management ---------------------------------------------------------
 
   const [disks, setDisks] = useState<string[]>(Array(10).fill('empty'));
   const [mountPoints, setMountPoints] = useState<string[]>(Array(10).fill('empty'));
@@ -128,7 +138,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     []
   );
 
-  // --------------------------------------------------------------
+  // disk copy --------------------------------------------------------------
 
   const [source, setSource] = useState<string | null>(null);
   const handleSourceChange = (event: React.ChangeEvent<HTMLInputElement>, newValue: string) => {
@@ -274,6 +284,26 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   const [alertDialogContent, setAlertDialogContent] = useState<string>('');
 
+  // precheck --------------------------------------------------------------
+  const [reorder, toggleReorder] = useReducer((reorder) => !reorder, true);
+  const [precheck, togglePrecheck] = useReducer((precheck) => !precheck, true);
+  const [makelist, toggleMakelist] = useReducer((makelist) => !makelist, true);
+  const [nas, toggleNas] = useReducer((nas) => !nas, true);
+
+  const [inst, setInst] = useReducer(
+    (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
+    'aim'
+  );
+  const [room, setRoom] = useReducer(
+    (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
+    'room'
+  );
+
+  const copyDisable = useMemo(
+    () => showProgress || !source || !destination || !inst || !room,
+    [showProgress, source, destination, inst, room]
+  );
+
   return (
     <MainCtx.Provider
       value={{
@@ -305,6 +335,19 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         setAlertDialogContent,
         progressOff,
         handleCopyFormat,
+        reorder,
+        toggleReorder,
+        precheck,
+        togglePrecheck,
+        makelist,
+        toggleMakelist,
+        nas,
+        toggleNas,
+        inst,
+        setInst,
+        room,
+        setRoom,
+        copyDisable,
       }}
     >
       {children}
