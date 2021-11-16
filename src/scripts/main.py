@@ -21,6 +21,7 @@ from utils import (
 from unmount import unmount
 from format import run as format
 from diskcopy import run as diskcopy
+from reorder import run as reorder
 
 
 def send(message, file=sys.stdout, prefix=None):
@@ -72,6 +73,9 @@ if __name__ == "__main__":
     parser.add_argument("--format", action="store_true")
     parser.add_argument("--eject", action="store_true")
     parser.add_argument("--monitor", action="store_true")
+    parser.add_argument("--reorder", action="store_true")
+    parser.add_argument("--inst", default=None, type=str)
+    parser.add_argument("--room", default=None, type=str)
     args = parser.parse_args()
 
     with resources.path("data", "log_config.json") as log_config:
@@ -128,11 +132,10 @@ if __name__ == "__main__":
         elif not src.partition.readonly:
             send("コピー元をROでマウントし直してください。", file=sys.stderr, prefix="ERROR")
         else:
-            send(f"copy {args.path[0]} {args.path[1]}", prefix="next")
+            send(f"copy", prefix="next")
 
     if args.copy:
         if len(args.path) != 2:
-            # TODO: inform error to app
             sys.exit(ExitStatus.failure)
 
         src = search_instance(disks, args.path[0])
@@ -157,4 +160,23 @@ if __name__ == "__main__":
             simplebar=True,
         )
 
-        send(f"reorder {args.path[1]}", prefix="next")
+        send(f"reorder", prefix="next")
+
+    if args.reorder:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+
+        reorder(
+            src=target,
+            dest=target,
+            operation="move",
+            new_institution=args.inst,
+            new_room=args.room,
+            status=None,
+            includes=None,
+            excludes=None,
+            dry_run=True,
+            quiet=False,
+            simplebar=True,
+        )
+
+        send(f"precheck", prefix="next")

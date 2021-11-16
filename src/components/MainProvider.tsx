@@ -105,8 +105,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
           handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '));
         break;
       case 'next':
-        const [step, ...args] = messages;
-        handleSteps(step, args);
+        handleSteps(messages[0]);
         break;
       default:
         setLogs((prev) => [...prev, stdout]);
@@ -114,14 +113,19 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     }
   }, [stdout]);
 
-  const handleSteps = (step: string, path?: string[]) => {
+  const handleSteps = (step: string) => {
     switch (step) {
       case 'copy':
         handleCopy();
         break;
       case 'reorder':
-        if (reorder) send(`--reorder --path ${path[0]} --inst ${inst} --room ${room}`);
-        else progressOff();
+        handleReorder();
+        break;
+      case 'precheck':
+        break;
+      case 'make_list':
+        break;
+      case 'nas':
         break;
       default:
         progressOff();
@@ -271,7 +275,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   const handleCopy = (format: boolean = false): void => {
     console.log(
-      `R: clicked, ${format ? `format ${destination} & ` : ''}copy ${source} -> ${destination}`
+      `R: ${format ? `clicked, format ${destination} & ` : ''}copy ${source} -> ${destination}`
     );
 
     format
@@ -281,7 +285,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   };
 
   const handleCopycheck = (): void => {
-    console.log(`R: copycheck ${source}, ${destination}`);
+    console.log(`R: clicked, copycheck ${source}, ${destination}`);
 
     send(`--copycheck --path ${source} ${destination}`);
   };
@@ -314,6 +318,12 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     () => showProgress || !source || !destination || !inst || !room,
     [showProgress, source, destination, inst, room]
   );
+
+  const handleReorder = () => {
+    console.log(`R: reorder ${destination} (institution=${inst}, room=${room})`);
+
+    reorder ? send(`--reorder --path ${destination} --inst ${inst} --room ${room}`) : progressOff();
+  };
 
   return (
     <MainCtx.Provider
