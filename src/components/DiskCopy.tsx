@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, Divider, Grid, Typography } from '@mui/material';
+import { Button, Grid, Typography } from '@mui/material';
 
 import { useFunctions } from './MainProvider';
 import { AlertSnackbar } from './AlertSnackbar';
@@ -24,12 +24,7 @@ export const DiskCopy: React.FC = () => {
   } = useFunctions();
 
   const HandleCopyButton = () => (
-    <Button
-      variant="outlined"
-      onClick={handleCopycheck(source, destination)}
-      disabled={copyDisable}
-      size="large"
-    >
+    <Button variant="outlined" onClick={handleCopycheck} disabled={copyDisable} size="large">
       実行
     </Button>
   );
@@ -77,7 +72,7 @@ export const DiskCopy: React.FC = () => {
 
       <Logger />
 
-      <AlertDialog {...{ source, destination }} />
+      <AlertDialog />
       <AlertSnackbar />
     </>
   );

@@ -27,11 +27,14 @@ const send = async (arg: string) => {
 };
 
 export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
+  const [stdout, setStdout] = useReducer((_: string, arg: string) => arg, '');
+  const [stderr, setStderr] = useReducer((_: string, arg: string) => arg, '');
+
   useEffect(() => {
     console.log('R: only one after initial render');
 
-    api.onSendToRenderer(handleStdout);
-    api.onSendToRendererInRealTime(handleStderr);
+    api.onSendToRenderer(setStdout);
+    api.onSendToRendererInRealTime(setStderr);
 
     send('--monitor');
     send('--check');
@@ -72,9 +75,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     setMountPoints((prev) => [...prev.map((element, i) => (i === index ? mountPoint : element))]);
   };
 
-  const handleStdout = (arg: string): void => {
-    console.log(arg);
-    const [prefix, ...messages] = arg.split(' ');
+  useEffect(() => {
+    const [prefix, ...messages] = stdout.split(' ');
     const message = messages.join('');
 
     switch (prefix) {
@@ -102,12 +104,27 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         message.startsWith('ERROR') &&
           handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '));
         break;
-      case 'copy':
-        messages[0] === 'OK' && handleCopy(messages[1], messages[2]);
-        messages[0] === 'COMPLETED' && progressOff();
+      case 'next':
+        const [step, ...args] = messages;
+        handleSteps(step, args);
         break;
       default:
-        setLogs((prev) => [...prev, arg]);
+        setLogs((prev) => [...prev, stdout]);
+        break;
+    }
+  }, [stdout]);
+
+  const handleSteps = (step: string, path?: string[]) => {
+    switch (step) {
+      case 'copy':
+        handleCopy();
+        break;
+      case 'reorder':
+        if (reorder) send(`--reorder --path ${path[0]} --inst ${inst} --room ${room}`);
+        else progressOff();
+        break;
+      default:
+        progressOff();
         break;
     }
   };
@@ -193,10 +210,10 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     setDestination(null);
   }, []);
 
-  const handleStderr = (arg: string): void => {
-    console.log(arg);
+  useEffect(() => {
+    console.log(stderr);
 
-    const [prefix, ...messages] = arg.split(' ');
+    const [prefix, ...messages] = stderr.split(' ');
 
     switch (prefix) {
       case 'ALERT':
@@ -206,10 +223,10 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         handleSnackbarOpen(messages.join(' '));
         break;
       default:
-        updateProgress(arg);
+        updateProgress(stderr);
         break;
     }
-  };
+  }, [stderr]);
 
   const formatInterval = (t: number): string => {
     const [mins, s] = divmod(t, 60);
@@ -252,28 +269,22 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     }
   };
 
-  const handleCopy = useCallback((src: string, dest: string) => {
-    console.log(`R: clicked, copy ${src} -> ${dest}`);
+  const handleCopy = (format: boolean = false): void => {
+    console.log(
+      `R: clicked, ${format ? `format ${destination} & ` : ''}copy ${source} -> ${destination}`
+    );
 
-    send(`--copy --path ${src} ${dest}`);
+    format
+      ? send(`--copy --format --path ${source} ${destination}`)
+      : send(`--copy --path ${source} ${destination}`);
     progressOn();
-  }, []);
+  };
 
-  const handleCopyFormat = useCallback((src: string, dest: string) => {
-    console.log(`R: clicked, format ${dest} & copy ${src} -> ${dest}`);
+  const handleCopycheck = (): void => {
+    console.log(`R: copycheck ${source}, ${destination}`);
 
-    send(`--copy --format --path ${src} ${dest}`);
-    progressOn();
-  }, []);
-
-  const handleCopycheck = useCallback(
-    (src: string, dest: string) => (): void => {
-      console.log(`R: copycheck ${src}, ${dest}`);
-
-      send(`--copycheck --path ${src} ${dest}`);
-    },
-    []
-  );
+    send(`--copycheck --path ${source} ${destination}`);
+  };
 
   const killBySIGINT = useCallback((): void => {
     console.log('R: clicked, raise keyboard interrupt');
@@ -329,12 +340,12 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         destination,
         destinations,
         handleDestinationChange,
+        handleCopy,
         handleCopycheck,
         logs,
         alertDialogContent,
         setAlertDialogContent,
         progressOff,
-        handleCopyFormat,
         reorder,
         toggleReorder,
         precheck,

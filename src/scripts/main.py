@@ -128,7 +128,7 @@ if __name__ == "__main__":
         elif not src.partition.readonly:
             send("コピー元をROでマウントし直してください。", file=sys.stderr, prefix="ERROR")
         else:
-            send(f"OK {args.path[0]} {args.path[1]}", prefix="copy")
+            send(f"copy {args.path[0]} {args.path[1]}", prefix="next")
 
     if args.copy:
         if len(args.path) != 2:
@@ -157,4 +157,4 @@ if __name__ == "__main__":
             simplebar=True,
         )
 
-        send("COMPLETED", prefix="copy")
+        send(f"reorder {args.path[1]}", prefix="next")
