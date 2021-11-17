@@ -23,6 +23,7 @@ from format import run as format
 from diskcopy import run as diskcopy
 from reorder import run as reorder
 from precheck import run as precheck
+from make_list import run as make_list
 
 
 def send(message, file=sys.stdout, prefix=None):
@@ -194,6 +195,9 @@ if __name__ == "__main__":
 
     if args.make_list:
         target = search_instance(disks, args.path[0]).get_avail_path()
+
+        make_list(src=target, dest=target)
+
         send(f"nas", prefix="next")
 
     if args.nas:
