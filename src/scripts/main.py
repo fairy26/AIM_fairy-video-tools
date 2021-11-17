@@ -24,6 +24,7 @@ from diskcopy import run as diskcopy
 from reorder import run as reorder
 from precheck import run as precheck
 from make_list import run as make_list
+from nas import run as nas
 
 
 def send(message, file=sys.stdout, prefix=None):
@@ -202,4 +203,7 @@ if __name__ == "__main__":
 
     if args.nas:
         target = search_instance(disks, args.path[0]).get_avail_path()
+
+        # nas(src=target, dest=target, config, alias, bucket, dry_run=True, quiet=True, simplebar=True)
+
         send(f"finish", prefix="next")
