@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 from importlib import resources
+from pathlib import PurePosixPath
 from logging import config
 
 import pyudev
@@ -81,6 +82,7 @@ if __name__ == "__main__":
     parser.add_argument("--room", default=None, type=str)
     parser.add_argument("--precheck", action="store_true")
     parser.add_argument("--make_list", action="store_true")
+    parser.add_argument("--xlsx", default=None, type=str)
     parser.add_argument("--nas", action="store_true")
     args = parser.parse_args()
 
@@ -197,7 +199,9 @@ if __name__ == "__main__":
     if args.make_list:
         target = search_instance(disks, args.path[0]).get_avail_path()
 
-        make_list(src=target, dest=target)
+        dest = str(PurePosixPath(target).joinpath(args.xlsx))
+
+        make_list(src=target, dest=dest)
 
         send(f"nas", prefix="next")
 

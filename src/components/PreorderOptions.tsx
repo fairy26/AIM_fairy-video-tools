@@ -24,7 +24,7 @@ export const ReorderOption: React.VFC<Props> = ({ label, index }) => {
       <TextField
         required
         variant="standard"
-        id="outlined-ReorderTwoTonerequired"
+        id={`outlined-reorder-${label}-required`}
         label={label}
         value={[inst, room][index]}
         onChange={[setInst, setRoom][index]}

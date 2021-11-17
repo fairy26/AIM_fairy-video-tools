@@ -10,6 +10,7 @@ import {
 
 import { useFunctions } from './MainProvider';
 import { ReorderOption } from './PreorderOptions';
+import { MakelistOptinos } from './MakelistOptions';
 
 export const PreOptions = () => {
   const {
@@ -35,7 +36,7 @@ export const PreOptions = () => {
       </ListItemButton>
       {reorder &&
         ['施設名', '部屋番号'].map((label, index) => (
-          <ReorderOption key={`input_${index}`} {...{ label, index }} />
+          <ReorderOption key={`input_reorder_${index}`} {...{ label, index }} />
         ))}
 
       <ListItemButton onClick={togglePrecheck}>
@@ -55,6 +56,7 @@ export const PreOptions = () => {
 
         <Switch checked={makelist} />
       </ListItemButton>
+      {makelist && <MakelistOptinos key={'input_makelist'} label="ファイル名" />}
 
       <ListItemButton onClick={toggleNas}>
         <ListItemIcon>

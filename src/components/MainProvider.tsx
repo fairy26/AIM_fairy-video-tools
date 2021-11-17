@@ -318,6 +318,10 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
     'room'
   );
+  const [xlsxName, setXlsxName] = useReducer(
+    (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
+    ''
+  );
 
   const copyDisable = useMemo(
     () => showProgress || !source || !destination || !inst || !room,
@@ -337,9 +341,11 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   };
 
   const handleMakelist = () => {
-    console.log(`R: make_list ${destination}`);
+    console.log(`R: make_list ${xlsxName}.xlsx in ${destination}`);
 
-    makelist ? send(`--make_list --path ${destination}`) : progressOff();
+    makelist
+      ? send(`--make_list --path ${destination} --xlsx ${xlsxName + '.xlsx'}`)
+      : progressOff();
   };
 
   const handleNas = () => {
@@ -391,6 +397,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         setInst,
         room,
         setRoom,
+        xlsxName,
+        setXlsxName,
         copyDisable,
       }}
     >
