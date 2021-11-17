@@ -22,6 +22,7 @@ from unmount import unmount
 from format import run as format
 from diskcopy import run as diskcopy
 from reorder import run as reorder
+from precheck import run as precheck
 
 
 def send(message, file=sys.stdout, prefix=None):
@@ -178,7 +179,7 @@ if __name__ == "__main__":
             includes=None,
             excludes=None,
             dry_run=True,
-            quiet=False,
+            quiet=True,
             simplebar=True,
         )
 
@@ -186,6 +187,9 @@ if __name__ == "__main__":
 
     if args.precheck:
         target = search_instance(disks, args.path[0]).get_avail_path()
+
+        precheck(src=target, dest=target, dry_run=True, quiet=True, simplebar=True)
+
         send(f"make_list", prefix="next")
 
     if args.make_list:
