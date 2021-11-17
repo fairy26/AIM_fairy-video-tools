@@ -207,12 +207,14 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [logs, setLogs] = useState<string[]>([]);
 
   const progressOn = useCallback((): void => {
+    setOptionOpen(false);
     setLogs([]);
     setReorderErrorFiles([]);
     setShowProgress(true);
   }, []);
 
   const progressOff = useCallback((): void => {
+    setOptionOpen(true);
     setShowProgress(false);
     setPercentage(0);
     setRemaining('');
@@ -311,6 +313,10 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [alertDialogContent, setAlertDialogContent] = useState<string>('');
 
   // precheck --------------------------------------------------------------
+  const [optionsOpen, setOptionOpen] = useState<boolean>(true);
+
+  const toggleOptionsOpen = () => setOptionOpen((prev) => !prev);
+
   const [reorder, toggleReorder] = useReducer((reorder) => !reorder, true);
   const [precheck, togglePrecheck] = useReducer((precheck) => !precheck, true);
   const [makelist, toggleMakelist] = useReducer((makelist) => !makelist, true);
@@ -426,6 +432,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         roomError,
         xlsxNameError,
         reorderErrorFiles,
+        optionsOpen,
+        toggleOptionsOpen,
       }}
     >
       {children}
