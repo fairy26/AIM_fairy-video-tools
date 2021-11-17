@@ -76,6 +76,9 @@ if __name__ == "__main__":
     parser.add_argument("--reorder", action="store_true")
     parser.add_argument("--inst", default=None, type=str)
     parser.add_argument("--room", default=None, type=str)
+    parser.add_argument("--precheck", action="store_true")
+    parser.add_argument("--make_list", action="store_true")
+    parser.add_argument("--nas", action="store_true")
     args = parser.parse_args()
 
     with resources.path("data", "log_config.json") as log_config:
@@ -180,3 +183,15 @@ if __name__ == "__main__":
         )
 
         send(f"precheck", prefix="next")
+
+    if args.precheck:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+        send(f"make_list", prefix="next")
+
+    if args.make_list:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+        send(f"nas", prefix="next")
+
+    if args.nas:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+        send(f"finish", prefix="next")

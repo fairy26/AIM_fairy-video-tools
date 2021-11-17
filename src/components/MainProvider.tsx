@@ -124,10 +124,13 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         handleReorder();
         break;
       case 'precheck':
+        handlePrecheck();
         break;
       case 'make_list':
+        handleMakelist();
         break;
       case 'nas':
+        handleNas();
         break;
       default:
         progressOff();
@@ -325,6 +328,24 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     console.log(`R: reorder ${destination} (institution=${inst}, room=${room})`);
 
     reorder ? send(`--reorder --path ${destination} --inst ${inst} --room ${room}`) : progressOff();
+  };
+
+  const handlePrecheck = () => {
+    console.log(`R: precheck ${destination}`);
+
+    precheck ? send(`--precheck --path ${destination}`) : progressOff();
+  };
+
+  const handleMakelist = () => {
+    console.log(`R: make_list ${destination}`);
+
+    makelist ? send(`--make_list --path ${destination}`) : progressOff();
+  };
+
+  const handleNas = () => {
+    console.log(`R: nas ${destination} -> dest (config bucket)`);
+
+    nas ? send(`--nas --path ${destination}`) : progressOff();
   };
 
   return (
