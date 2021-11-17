@@ -1,32 +1,27 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
-import { Box, List, ListItemText, Paper } from '@mui/material';
+import { Box, List, ListItemText } from '@mui/material';
 
-import { useFunctions } from './MainProvider';
+type Props = {
+  contents: string[];
+};
 
-export const Logger: React.VFC = () => {
-  const { logs } = useFunctions();
-  const scrollRef = React.useRef(null);
+export const Logger: React.FC<Props> = ({ contents }) => {
+  const scrollRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [logs]);
+  }, [contents]);
 
-  if (logs.length) {
-    return (
-      <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Box ref={scrollRef} sx={{ maxHeight: 270, flexGrow: 1, overflowY: 'auto' }}>
-          <List dense sx={{ paddingX: 2 }}>
-            {logs.map((line: string, index: number) => (
-              <ListItemText key={`log_${index}`} primary={line} />
-            ))}
-          </List>
-        </Box>
-      </Paper>
-    );
-  } else {
-    return <></>;
-  }
+  return (
+    <Box ref={scrollRef} sx={{ maxHeight: 270, flexGrow: 1, overflowY: 'auto' }}>
+      <List dense sx={{ paddingX: 2 }}>
+        {contents.map((line: string, index: number) => (
+          <ListItemText key={`${line}_${index}`} primary={line} />
+        ))}
+      </List>
+    </Box>
+  );
 };

@@ -30,8 +30,9 @@ def run(
 
     src_dirtree = get_dirtree(src)
     src_dirtree = filter_dirtree(src_dirtree, includes=includes, excludes=excludes)
-    reorder(src_dirtree, dest, operation, new_institution, new_room, status, dry_run, quiet, simplebar)
+    unable_files = reorder(src_dirtree, dest, operation, new_institution, new_room, status, dry_run, quiet, simplebar)
 
+    return unable_files
     # sys.exit(ExitStatus.success)
 
 
@@ -47,6 +48,7 @@ def reorder(src_dirtree, dest, operation, institute, room, status=None, dry_run=
     d2 = DirNode(name=f"{institute}-{room}", parent=d1)
 
     dup_check = set()
+    unable_files = set()
 
     for node in PreOrderIter(src_dirtree):
         if type(node) == FileNode:
@@ -81,6 +83,10 @@ def reorder(src_dirtree, dest, operation, institute, room, status=None, dry_run=
                     dup_check.add(name)
 
                 FileNode(name=name, parent=d5, src_path=node.get_path())
+
+            elif re.match(r"^.*\.avi$", node.name):
+                logger.error('reorder error: "%s"', node.name)
+                unable_files.add(node.name)
 
     total_size = 0
     for node in PreOrderIter(new_root):
@@ -134,3 +140,5 @@ def reorder(src_dirtree, dest, operation, institute, room, status=None, dry_run=
 
     if not dry_run:
         pbar.close()
+
+    return unable_files

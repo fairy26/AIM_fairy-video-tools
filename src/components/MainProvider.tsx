@@ -208,6 +208,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   const progressOn = useCallback((): void => {
     setLogs([]);
+    setReorderErrorFiles([]);
     setShowProgress(true);
   }, []);
 
@@ -224,13 +225,17 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     if (!stderr) return;
 
     const [prefix, ...messages] = stderr.split(' ');
+    const message = messages.join(' ');
 
     switch (prefix) {
       case 'ALERT':
-        setAlertDialogContent(messages.join(' '));
+        setAlertDialogContent(message);
         break;
       case 'ERROR':
-        handleSnackbarOpen(messages.join(' '));
+        handleSnackbarOpen(message);
+        break;
+      case 'REORDER':
+        setReorderErrorFiles((prev) => [...prev, message]);
         break;
       default:
         updateProgress(stderr);
@@ -343,6 +348,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     [showProgress, source, destination, inst, room, instError, roomError, xlsxNameError]
   );
 
+  const [reorderErrorFiles, setReorderErrorFiles] = useState<string[]>([]);
+
   const handleReorder = () => {
     console.log(`R: reorder ${destination} (institution=${inst}, room=${room})`);
 
@@ -418,6 +425,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         instError,
         roomError,
         xlsxNameError,
+        reorderErrorFiles,
       }}
     >
       {children}

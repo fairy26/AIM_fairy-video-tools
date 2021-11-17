@@ -7,8 +7,8 @@ import { AlertSnackbar } from './AlertSnackbar';
 import { AlertDialog } from './AlertDialog';
 import { CopyTargetSelect } from './CopyTargetSelect';
 import { GriddedPbar } from './GriddedPbar';
-import { Logger } from './Logger';
 import { PreOptions } from './PreOptions';
+import { OutputTabs } from './OutputTabs';
 
 export const DiskCopy: React.FC = () => {
   const {
@@ -70,7 +70,7 @@ export const DiskCopy: React.FC = () => {
         <GriddedPbar />
       </Grid>
 
-      <Logger />
+      <OutputTabs />
 
       <AlertDialog />
       <AlertSnackbar />
