@@ -76,6 +76,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   };
 
   useEffect(() => {
+    if (!stdout) return;
+
     const [prefix, ...messages] = stdout.split(' ');
     const message = messages.join('');
 
@@ -215,7 +217,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   }, []);
 
   useEffect(() => {
-    console.log(stderr);
+    if (!stderr) return;
 
     const [prefix, ...messages] = stderr.split(' ');
 
