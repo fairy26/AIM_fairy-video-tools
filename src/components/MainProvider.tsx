@@ -16,6 +16,7 @@ export const useFunctions = () => useContext(MainCtx);
 const strToArray = (str: string): string[] => str.slice(1, -1).split(',');
 const removeSingleQuote = (str: string): string => str.replace(/'/g, '');
 const divmod = (x: number, y: number): number[] => [Math.floor(x / y), x % y];
+const inputOk = (str: string): boolean => /^[\w-]+$/.test(str);
 
 let index: number = 0;
 
@@ -320,12 +321,26 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   );
   const [xlsxName, setXlsxName] = useReducer(
     (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
-    ''
+    'disk-'
   );
 
+  const instError = useMemo(() => !inputOk(inst), [inst]);
+
+  const roomError = useMemo(() => !inputOk(room), [room]);
+
+  const xlsxNameError = useMemo(() => !inputOk(xlsxName), [xlsxName]);
+
   const copyDisable = useMemo(
-    () => showProgress || !source || !destination || !inst || !room,
-    [showProgress, source, destination, inst, room]
+    () =>
+      showProgress ||
+      !source ||
+      !destination ||
+      !inst ||
+      !room ||
+      instError ||
+      roomError ||
+      xlsxNameError,
+    [showProgress, source, destination, inst, room, instError, roomError, xlsxNameError]
   );
 
   const handleReorder = () => {
@@ -400,6 +415,9 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         xlsxName,
         setXlsxName,
         copyDisable,
+        instError,
+        roomError,
+        xlsxNameError,
       }}
     >
       {children}

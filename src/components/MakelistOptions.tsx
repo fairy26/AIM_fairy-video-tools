@@ -10,15 +10,19 @@ type Props = {
 };
 
 export const MakelistOptinos: React.VFC<Props> = ({ label }) => {
-  const { xlsxName, setXlsxName } = useFunctions();
+  const { xlsxName, setXlsxName, xlsxNameError } = useFunctions();
 
   return (
-    <ListItem sx={{ display: 'flex', alignItems: 'flex-end', paddingLeft: 6 }}>
-      <ListItemIcon sx={{ marginBottom: 0.5 }}>
+    <ListItem sx={{ display: 'flex', alignItems: 'flex-start', paddingLeft: 6 }}>
+      <ListItemIcon sx={{ marginTop: 2 }}>
         <InsertDriveFileIcon />
       </ListItemIcon>
       <TextField
         required
+        error={xlsxNameError}
+        helperText={
+          xlsxNameError && (xlsxName ? '使えない文字が含まれています' : '入力してください')
+        }
         variant="standard"
         id={`outlined-makelist-${label}-required`}
         label={label}

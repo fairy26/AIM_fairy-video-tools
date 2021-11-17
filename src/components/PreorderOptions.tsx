@@ -14,15 +14,20 @@ type Props = {
 };
 
 export const ReorderOption: React.VFC<Props> = ({ label, index }) => {
-  const { inst, setInst, room, setRoom } = useFunctions();
+  const { inst, setInst, instError, room, setRoom, roomError } = useFunctions();
 
   return (
-    <ListItem sx={{ display: 'flex', alignItems: 'flex-end', paddingLeft: 6 }}>
-      <ListItemIcon sx={{ marginBottom: 0.5 }}>
+    <ListItem sx={{ display: 'flex', alignItems: 'flex-start', paddingLeft: 6 }}>
+      <ListItemIcon sx={{ marginTop: 2 }}>
         {[<LocationCityIcon />, <MeetingRoomIcon />][index]}
       </ListItemIcon>
       <TextField
         required
+        error={[instError, roomError][index]}
+        helperText={
+          [instError, roomError][index] &&
+          ([inst, room][index] ? '使えない文字が含まれています' : '入力してください')
+        }
         variant="standard"
         id={`outlined-reorder-${label}-required`}
         label={label}
