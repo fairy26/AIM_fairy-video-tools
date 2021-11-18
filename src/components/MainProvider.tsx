@@ -326,10 +326,60 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   const toggleOptionsOpen = () => setOptionOpen((prev) => !prev);
 
-  const [reorder, toggleReorder] = useReducer((reorder) => !reorder, true);
-  const [precheck, togglePrecheck] = useReducer((precheck) => !precheck, true);
-  const [makelist, toggleMakelist] = useReducer((makelist) => !makelist, true);
-  const [nas, toggleNas] = useReducer((nas) => !nas, true);
+  const [reorder, setReorder] = useState<boolean>(true);
+  const [precheck, setPrecheck] = useState<boolean>(true);
+  const [makelist, setMakelist] = useState<boolean>(true);
+  const [nas, setNas] = useState<boolean>(true);
+
+  const toggleReorder = () => {
+    setReorder((prev) => !prev);
+  };
+
+  const togglePrecheck = () => {
+    setPrecheck((prev) => !prev);
+  };
+
+  const toggleMakelist = () => {
+    setMakelist((prev) => !prev);
+  };
+
+  const toggleNas = () => {
+    setNas((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (!reorder) {
+      setPrecheck(false);
+      setMakelist(false);
+      setNas(false);
+    }
+  }, [reorder]);
+
+  useEffect(() => {
+    if (precheck) {
+      setReorder(true);
+    } else {
+      setMakelist(false);
+      setNas(false);
+    }
+  }, [precheck]);
+
+  useEffect(() => {
+    if (makelist) {
+      setReorder(true);
+      setPrecheck(true);
+    } else {
+      setNas(false);
+    }
+  }, [makelist]);
+
+  useEffect(() => {
+    if (nas) {
+      setReorder(true);
+      setPrecheck(true);
+      setMakelist(true);
+    }
+  }, [nas]);
 
   const [inst, setInst] = useReducer(
     (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
