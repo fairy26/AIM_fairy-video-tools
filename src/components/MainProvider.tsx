@@ -16,7 +16,7 @@ export const useFunctions = () => useContext(MainCtx);
 const strToArray = (str: string): string[] => str.slice(1, -1).split(',');
 const removeSingleQuote = (str: string): string => str.replace(/'/g, '');
 const divmod = (x: number, y: number): number[] => [Math.floor(x / y), x % y];
-const inputOk = (str: string): boolean => /^[\w-]+$/.test(str);
+const inputOk = (str: string): boolean => /^[\w]+$/.test(str);
 
 let index: number = 0;
 
