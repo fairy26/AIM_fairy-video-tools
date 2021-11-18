@@ -13,11 +13,10 @@ from mount import mount
 from utils import (
     apply_format,
     apply_mount,
-    get_access_list,
-    get_disk_list,
     get_located_disks,
-    get_mountpoint_list,
+    reload,
     search_instance,
+    send,
 )
 from unmount import unmount
 from format import run as format
@@ -26,20 +25,6 @@ from reorder import run as reorder
 from precheck import run as precheck
 from make_list import run as make_list
 from nas import run as nas
-
-
-def send(message, file=sys.stdout, prefix=None):
-    if prefix:
-        message = f"{prefix} {message}"
-    print(message, file=file)
-    file.flush()
-
-
-def reload():
-    disks = get_located_disks()
-    send(get_disk_list(disks), prefix="disk")
-    send(get_mountpoint_list(disks), prefix="mountpoint")
-    send(get_access_list(disks), prefix="access")
 
 
 def monitoring():
@@ -79,6 +64,9 @@ if __name__ == "__main__":
     if args.monitor:
         monitoring()
 
+    if args.check:
+        reload()
+
     if args.eject:
         target = search_instance(disks, args.path[0])
         status = eject(target.path)
@@ -101,9 +89,6 @@ if __name__ == "__main__":
     if args.unmount:
         status = unmount(args.path[0])
         send(status, prefix="unmount")
-
-    if args.check:
-        reload()
 
     if args.copycheck:
 

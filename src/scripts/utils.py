@@ -1,11 +1,12 @@
-from dataclasses import asdict, dataclass
 import dataclasses
-from enum import Enum
-from glob import glob
 import json
 import os
 import re
 import subprocess
+import sys
+from enum import Enum
+from dataclasses import asdict, dataclass
+from glob import glob
 from subprocess import PIPE
 from typing import List, Optional
 
@@ -56,6 +57,20 @@ class Disk:
             return None
         else:
             return self.partition.path
+
+
+def send(message, file=sys.stdout, prefix=None):
+    if prefix:
+        message = f"{prefix} {message}"
+    print(message, file=file)
+    file.flush()
+
+
+def reload():
+    disks = get_located_disks()
+    send(get_disk_list(disks), prefix="disk")
+    send(get_mountpoint_list(disks), prefix="mountpoint")
+    send(get_access_list(disks), prefix="access")
 
 
 def check_blank(mountpoint: str) -> bool:
