@@ -12,7 +12,7 @@ export const GriddedPbar: React.VFC = () => {
       xs={12}
       container
       justifyContent="flex-end"
-      alignItems="flex-end"
+      alignItems={remaining ? 'flex-end' : 'center'}
       spacing={1}
       sx={{ display: !showProgress && 'none' }}
     >
