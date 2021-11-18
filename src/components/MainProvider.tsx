@@ -383,15 +383,15 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   const [inst, setInst] = useReducer(
     (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
-    'aim'
+    ''
   );
   const [room, setRoom] = useReducer(
     (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
-    'room'
+    ''
   );
   const [xlsxName, setXlsxName] = useReducer(
     (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
-    'disk-'
+    ''
   );
 
   const instError = useMemo(() => !inputOkInReorder(inst), [inst]);
