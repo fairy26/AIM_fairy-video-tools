@@ -4,10 +4,10 @@ from importlib import resources
 from pathlib import PurePosixPath
 from logging import config
 
-import pyudev
 from exitstatus import ExitStatus
 
 from parser import parse
+from monitor import monitoring
 from eject import eject
 from mount import mount
 from utils import (
@@ -25,22 +25,6 @@ from reorder import run as reorder
 from precheck import run as precheck
 from make_list import run as make_list
 from nas import run as nas
-
-
-def monitoring():
-
-    context = pyudev.Context()
-    monitor = pyudev.Monitor.from_netlink(context)
-
-    try:
-        monitor.start()
-
-        for device in iter(monitor.poll, None):
-            if device.device_type in {"disk", "partition"}:
-                reload()
-
-    except KeyboardInterrupt:
-        sys.exit(ExitStatus.success)
 
 
 if __name__ == "__main__":
