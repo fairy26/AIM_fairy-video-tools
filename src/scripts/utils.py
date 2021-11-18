@@ -346,6 +346,18 @@ def apply_mount(disk: Optional[Disk]):
     disk = check_mounts(disk)
 
 
+def apply_unmount(disk: Optional[Disk]):
+    if disk is None:
+        return
+
+    if disk.partition is not None:
+        disk.partition.mounted = False
+        disk.partition.mountpoint = None
+        disk.partition.binded = False
+        disk.partition.bindedmountpoint = None
+        disk.partition.readonly = False
+
+
 if __name__ == "__main__":
     from pprint import pprint
 

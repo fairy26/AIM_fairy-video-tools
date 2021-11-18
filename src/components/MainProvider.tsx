@@ -140,11 +140,11 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   };
 
   const handleMount = (newIndex: number) => (): void => {
-    console.log('R: clicked, change mount states' + newIndex);
+    console.log(`R: clicked, change mount states ${newIndex}:${disks[newIndex]}`);
 
     index = newIndex;
     mounted[index]
-      ? send(`--unmount --path ${mountPoints[index]}`)
+      ? send(`--unmount --path ${disks[index]}`)
       : readOnlyFlags[index]
       ? send(`--mount --read-only --path ${disks[index]}`)
       : send(`--mount --path ${disks[index]}`);

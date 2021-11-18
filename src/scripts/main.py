@@ -13,6 +13,7 @@ from mount import mount
 from utils import (
     apply_format,
     apply_mount,
+    apply_unmount,
     get_located_disks,
     reload,
     search_instance,
@@ -71,8 +72,15 @@ if __name__ == "__main__":
         send(mpath, prefix="mount")
 
     if args.unmount:
-        status = unmount(args.path[0])
-        send(status, prefix="unmount")
+        target_disk = search_instance(disks, args.path[0])
+        target = target_disk.get_avail_path()
+
+        if target is not None:
+            unmount(mountpoint=target)
+            apply_unmount(disk=target_disk)
+
+        mpath = target_disk.get_avail_path() or "not_mounted"
+        send(mpath, prefix="unmount")
 
     if args.copycheck:
 
