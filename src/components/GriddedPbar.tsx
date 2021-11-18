@@ -14,7 +14,7 @@ export const GriddedPbar: React.VFC = () => {
       justifyContent="flex-end"
       alignItems="flex-end"
       spacing={1}
-      sx={{ display: showProgress ? 'block' : 'none' }}
+      sx={{ display: !showProgress && 'none' }}
     >
       <Grid item xs>
         <LinearProgress variant={remaining ? 'determinate' : 'indeterminate'} value={percentage} />
