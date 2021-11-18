@@ -239,7 +239,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
       case 'ERROR':
         handleSnackbarOpen(message);
         break;
-      case 'REORDER':
+      case 'FILEERROR':
         setReorderErrorFiles((prev) => [...prev, message]);
         break;
       default:
@@ -362,29 +362,31 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [reorderErrorFiles, setReorderErrorFiles] = useState<string[]>([]);
 
   const handleReorder = () => {
-    console.log(`R: reorder ${destination} (institution=${inst}, room=${room})`);
-
-    reorder ? send(`--reorder --path ${destination} --inst ${inst} --room ${room}`) : progressOff();
+    if (reorder) {
+      console.log(`R: reorder ${destination} (institution=${inst}, room=${room})`);
+      send(`--reorder --path ${destination} --inst ${inst} --room ${room}`);
+    } else progressOff();
   };
 
   const handlePrecheck = () => {
-    console.log(`R: precheck ${destination}`);
-
-    precheck ? send(`--precheck --path ${destination}`) : progressOff();
+    if (precheck) {
+      console.log(`R: precheck ${destination}`);
+      send(`--precheck --path ${destination}`);
+    } else progressOff();
   };
 
   const handleMakelist = () => {
-    console.log(`R: make_list ${xlsxName}.xlsx in ${destination}`);
-
-    makelist
-      ? send(`--make_list --path ${destination} --xlsx ${xlsxName + '.xlsx'}`)
-      : progressOff();
+    if (makelist) {
+      console.log(`R: make_list ${xlsxName}.xlsx in ${destination}`);
+      send(`--make_list --path ${destination} --xlsx ${xlsxName + '.xlsx'}`);
+    } else progressOff();
   };
 
   const handleNas = () => {
-    console.log(`R: nas ${destination} -> dest (config bucket)`);
-
-    nas ? send(`--nas --path ${destination}`) : progressOff();
+    if (nas) {
+      console.log(`R: nas ${destination} -> dest (config bucket)`);
+      send(`--nas --path ${destination}`);
+    } else progressOff();
   };
 
   return (

@@ -31,7 +31,7 @@ export const OutputTabs: React.FC = () => {
         </TabPanel>
         <TabPanel value="2">
           <Alert severity="warning">
-            <AlertTitle>仕分けできない動画が含まれています</AlertTitle>
+            <AlertTitle>名前が適切でない動画が検出されました</AlertTitle>
             <Logger contents={reorderErrorFiles} />
           </Alert>
         </TabPanel>
@@ -39,7 +39,7 @@ export const OutputTabs: React.FC = () => {
     );
   } else if (logs.length) {
     return (
-      <Paper variant="outlined" sx={{ p: 3 }}>
+      <Paper variant="outlined" sx={{ margin: 3 }}>
         <Logger contents={logs} />
       </Paper>
     );

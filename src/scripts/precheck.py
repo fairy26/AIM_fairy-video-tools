@@ -12,6 +12,7 @@ from tqdm import tqdm
 import ffpb
 
 from libs.dirtree import DirNode, FileNode, RootNode, get_dirtree
+from utils import send
 
 # from zd.video.preview import create_preview
 
@@ -39,6 +40,8 @@ def preview(src_dirtree, dest, dry_run=True, quiet=False, simplebar=False):
 
     new_root = RootNode(name=DIR.name, rootpath=PARENT)
 
+    name_error_files = set()
+
     for node in PreOrderIter(src_dirtree):
         if type(node) == FileNode:
             m = re.match(
@@ -65,6 +68,12 @@ def preview(src_dirtree, dest, dry_run=True, quiet=False, simplebar=False):
                     d5 = DirNode(name=f"{yyyy}-{mm}-{dd}", parent=d4)
 
                 FileNode(name=node.name.replace(".avi", ".mp4"), parent=d5, src_path=node.get_path())
+            elif re.match(r"^.*\.avi$", node.name) and not ".Trash-1000" in str(node.get_path):
+                logger.error('precheck error: "%s"', node.get_path())
+                name_error_files.add(node.name)
+
+    for filename in name_error_files:
+        send(f"precheck\t{filename}", file=sys.stderr, prefix="FILEERROR")
 
     total_size = 0
     for node in PreOrderIter(new_root):

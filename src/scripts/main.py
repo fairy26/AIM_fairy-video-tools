@@ -132,7 +132,7 @@ if __name__ == "__main__":
         target = search_instance(disks, args.path[0]).get_avail_path()
 
         if target is not None:
-            unable_files = reorder(
+            reorder(
                 src=target,
                 dest=target,
                 operation="move",
@@ -145,9 +145,6 @@ if __name__ == "__main__":
                 quiet=True,
                 simplebar=True,
             )
-
-            for file in unable_files:
-                send(file, file=sys.stderr, prefix="REORDER")
 
         send(f"precheck", prefix="next")
 
