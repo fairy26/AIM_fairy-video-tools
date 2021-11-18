@@ -1,4 +1,3 @@
-import argparse
 import json
 import sys
 from importlib import resources
@@ -8,6 +7,7 @@ from logging import config
 import pyudev
 from exitstatus import ExitStatus
 
+from parser import parse
 from eject import eject
 from mount import mount
 from utils import (
@@ -65,26 +65,7 @@ if __name__ == "__main__":
     #   args = [sys.executable] + argv
     #   os.execlp('sudo', *args)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--quiet", default=False, action=argparse.BooleanOptionalAction, help="quiet mode")
-    parser.add_argument("--path", default=None, action="extend", nargs="+", type=str)
-    parser.add_argument("--mount", action="store_true")
-    parser.add_argument("--ro", "--read-only", action="store_true")
-    parser.add_argument("--unmount", action="store_true")
-    parser.add_argument("--check", action="store_true")
-    parser.add_argument("--copycheck", action="store_true")
-    parser.add_argument("--copy", action="store_true")
-    parser.add_argument("--format", action="store_true")
-    parser.add_argument("--eject", action="store_true")
-    parser.add_argument("--monitor", action="store_true")
-    parser.add_argument("--reorder", action="store_true")
-    parser.add_argument("--inst", default=None, type=str)
-    parser.add_argument("--room", default=None, type=str)
-    parser.add_argument("--precheck", action="store_true")
-    parser.add_argument("--make_list", action="store_true")
-    parser.add_argument("--xlsx", default=None, type=str)
-    parser.add_argument("--nas", action="store_true")
-    args = parser.parse_args()
+    args = parse()
 
     with resources.path("data", "log_config.json") as log_config:
         with open(log_config, encoding="utf-8") as f:
@@ -182,7 +163,7 @@ if __name__ == "__main__":
             status=None,
             includes=None,
             excludes=None,
-            dry_run=True,
+            dry_run=False,
             quiet=True,
             simplebar=True,
         )
@@ -195,7 +176,7 @@ if __name__ == "__main__":
     if args.precheck:
         target = search_instance(disks, args.path[0]).get_avail_path()
 
-        precheck(src=target, dest=target, dry_run=True, quiet=True, simplebar=True)
+        precheck(src=target, dest=target, dry_run=False, quiet=True, simplebar=True)
 
         send(f"make_list", prefix="next")
 
