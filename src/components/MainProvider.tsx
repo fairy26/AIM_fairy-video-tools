@@ -114,6 +114,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         setLogs((prev) => [...prev, stdout]);
         break;
     }
+
+    setStdout('');
   }, [stdout]);
 
   const handleSteps = (step: string) => {
@@ -243,6 +245,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         updateProgress(stderr);
         break;
     }
+
+    setStderr('');
   }, [stderr]);
 
   const formatInterval = (t: number): string => {
