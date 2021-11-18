@@ -279,9 +279,13 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
       const newPercentage = parseInt(progress[0], 10);
       const newRemaining =
-        progress[1] === '?' ? '' : `残り ${formatInterval(parseInt(progress[1], 10))}`;
+        progress[1] === '?' || progress[1] === '0'
+          ? ''
+          : `残り ${formatInterval(parseInt(progress[1], 10))}`;
       const newEndTime =
-        progress[1] === '?' ? '' : `終了予定 ${formatEndTime(parseInt(progress[1], 10))}`;
+        progress[1] === '?' || progress[1] === '0'
+          ? ''
+          : `終了予定 ${formatEndTime(parseInt(progress[1], 10))}`;
 
       setPercentage(newPercentage);
       setRemaining(newRemaining);
