@@ -152,7 +152,7 @@ if __name__ == "__main__":
         target = search_instance(disks, args.path[0]).get_avail_path()
 
         if target is not None:
-            precheck(src=target, dest=target, dry_run=True, quiet=True, simplebar=True)
+            precheck(src=target, dest=target, dry_run=False, quiet=True, simplebar=True)
 
         send(f"make_list", prefix="next")
 
@@ -170,7 +170,15 @@ if __name__ == "__main__":
         target = search_instance(disks, args.path[0]).get_avail_path()
 
         if target is not None:
-            pass
-            # nas(src=target, dest=target, config, alias, bucket, dry_run=True, quiet=True, simplebar=True)
+            nas(
+                src=target,
+                dest=".",  # need to change
+                config=resources.path("data", "nas_config.json"),  # need to change
+                alias="catalog",  # need to change
+                bucket="preview",  # need to change
+                dry_run=True,
+                quiet=False,
+                simplebar=True,
+            )
 
         send(f"finish", prefix="next")
