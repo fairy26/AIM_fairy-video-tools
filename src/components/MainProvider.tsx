@@ -219,11 +219,15 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const progressOff = useCallback((): void => {
     setOptionOpen(true);
     setShowProgress(false);
+    initRemaining();
+    setSource(null);
+    setDestination(null);
+  }, []);
+
+  const initRemaining = useCallback((): void => {
     setPercentage(0);
     setRemaining('');
     setEndTime('');
-    setSource(null);
-    setDestination(null);
   }, []);
 
   useEffect(() => {
@@ -279,13 +283,9 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
       const newPercentage = parseInt(progress[0], 10);
       const newRemaining =
-        progress[1] === '?' || progress[1] === '0'
-          ? ''
-          : `残り ${formatInterval(parseInt(progress[1], 10))}`;
+        progress[1] === '?' ? '' : `残り ${formatInterval(parseInt(progress[1], 10))}`;
       const newEndTime =
-        progress[1] === '?' || progress[1] === '0'
-          ? ''
-          : `終了予定 ${formatEndTime(parseInt(progress[1], 10))}`;
+        progress[1] === '?' ? '' : `終了予定 ${formatEndTime(parseInt(progress[1], 10))}`;
 
       setPercentage(newPercentage);
       setRemaining(newRemaining);
@@ -418,6 +418,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const handleReorder = () => {
     if (reorder) {
       console.log(`R: reorder ${destination} (institution=${inst}, room=${room})`);
+      initRemaining();
       send(`--reorder --path ${destination} --inst ${inst} --room ${room}`);
     } else progressOff();
   };
@@ -425,6 +426,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const handlePrecheck = () => {
     if (precheck) {
       console.log(`R: precheck ${destination}`);
+      initRemaining();
       send(`--precheck --path ${destination}`);
     } else progressOff();
   };
@@ -432,6 +434,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const handleMakelist = () => {
     if (makelist) {
       console.log(`R: make_list ${xlsxName}.xlsx in ${destination}`);
+      initRemaining();
       send(`--make_list --path ${destination} --xlsx ${xlsxName + '.xlsx'}`);
     } else progressOff();
   };
@@ -439,6 +442,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const handleNas = () => {
     if (nas) {
       console.log(`R: nas ${destination} -> dest (config bucket)`);
+      initRemaining();
       send(`--nas --path ${destination}`);
     } else progressOff();
   };
