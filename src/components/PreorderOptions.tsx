@@ -14,15 +14,19 @@ type Props = {
 };
 
 export const ReorderOption: React.VFC<Props> = ({ label, index }) => {
-  const { inst, setInst, instError, room, setRoom, roomError } = useFunctions();
+  const { showProgress, inst, setInst, instError, room, setRoom, roomError } = useFunctions();
 
   return (
-    <ListItem sx={{ display: 'flex', alignItems: 'flex-start', paddingLeft: 6 }}>
+    <ListItem
+      disabled={showProgress}
+      sx={{ display: 'flex', alignItems: 'flex-start', paddingLeft: 6 }}
+    >
       <ListItemIcon sx={{ marginTop: 2 }}>
         {[<LocationCityIcon />, <MeetingRoomIcon />][index]}
       </ListItemIcon>
       <TextField
         required
+        disabled={showProgress}
         error={[instError, roomError][index]}
         helperText={
           [instError, roomError][index] &&
