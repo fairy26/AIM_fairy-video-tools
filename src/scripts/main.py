@@ -131,44 +131,49 @@ if __name__ == "__main__":
     if args.reorder:
         target = search_instance(disks, args.path[0]).get_avail_path()
 
-        unable_files = reorder(
-            src=target,
-            dest=target,
-            operation="move",
-            new_institution=args.inst,
-            new_room=args.room,
-            status=None,
-            includes=None,
-            excludes=None,
-            dry_run=False,
-            quiet=True,
-            simplebar=True,
-        )
+        if target is not None:
+            unable_files = reorder(
+                src=target,
+                dest=target,
+                operation="move",
+                new_institution=args.inst,
+                new_room=args.room,
+                status=None,
+                includes=None,
+                excludes=None,
+                dry_run=False,
+                quiet=True,
+                simplebar=True,
+            )
 
-        for file in unable_files:
-            send(file, file=sys.stderr, prefix="REORDER")
+            for file in unable_files:
+                send(file, file=sys.stderr, prefix="REORDER")
 
         send(f"precheck", prefix="next")
 
     if args.precheck:
         target = search_instance(disks, args.path[0]).get_avail_path()
 
-        precheck(src=target, dest=target, dry_run=False, quiet=True, simplebar=True)
+        if target is not None:
+            precheck(src=target, dest=target, dry_run=True, quiet=True, simplebar=True)
 
         send(f"make_list", prefix="next")
 
     if args.make_list:
         target = search_instance(disks, args.path[0]).get_avail_path()
 
-        dest = str(PurePosixPath(target).joinpath(args.xlsx))
+        if target is not None:
+            dest = str(PurePosixPath(target).joinpath(args.xlsx))
 
-        make_list(src=target, dest=dest)
+            make_list(src=target, dest=dest)
 
         send(f"nas", prefix="next")
 
     if args.nas:
         target = search_instance(disks, args.path[0]).get_avail_path()
 
-        # nas(src=target, dest=target, config, alias, bucket, dry_run=True, quiet=True, simplebar=True)
+        if target is not None:
+            pass
+            # nas(src=target, dest=target, config, alias, bucket, dry_run=True, quiet=True, simplebar=True)
 
         send(f"finish", prefix="next")
