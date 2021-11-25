@@ -327,7 +327,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [reorder, setReorder] = useState<boolean>(true);
   const [precheck, setPrecheck] = useState<boolean>(true);
   const [makelist, setMakelist] = useState<boolean>(true);
-  const [nas, setNas] = useState<boolean>(true);
+  const [nas, setNas] = useState<boolean>(false);
 
   const toggleReorder = () => {
     setReorder((prev) => !prev);

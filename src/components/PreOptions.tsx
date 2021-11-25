@@ -2,7 +2,7 @@ import React from 'react';
 
 import { List, ListItemIcon, ListItemText, ListItemButton, Switch } from '@mui/material';
 import {
-  Backup as BackupIcon,
+  // Backup as BackupIcon, // nas
   Movie as MovieIcon,
   Reorder as ReorderIcon,
   ViewList as ViewListIcon,
@@ -78,14 +78,15 @@ export const PreOptions = () => {
           </ListItemButton>
           {makelist && <MakelistOptinos key={'input_makelist'} label="ファイル名" />}
 
-          <ListItemButton onClick={toggleNas} disabled={showProgress}>
+          {/* nas */}
+          {/* <ListItemButton onClick={toggleNas} disabled={showProgress}>
             <ListItemIcon>
               <BackupIcon />
             </ListItemIcon>
             <ListItemText primary="NASにアップロードする" />
 
             <Switch checked={nas} />
-          </ListItemButton>
+          </ListItemButton> */}
         </>
       )}
     </List>
