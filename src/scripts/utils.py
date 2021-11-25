@@ -68,9 +68,9 @@ def send(message, file=sys.stdout, prefix=None):
 
 def reload():
     disks = get_located_disks()
-    send(get_disk_list(disks), prefix="disk")
-    send(get_mountpoint_list(disks), prefix="mountpoint")
-    send(get_access_list(disks), prefix="access")
+    send(get_disk_list(disks), prefix="DISK")
+    send(get_mountpoint_list(disks), prefix="MOUNTPOINT")
+    send(get_access_list(disks), prefix="ACCESS")
 
 
 def check_blank(mountpoint: str) -> bool:

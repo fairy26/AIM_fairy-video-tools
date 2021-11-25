@@ -57,7 +57,7 @@ if __name__ == "__main__":
         status = eject(target.path)
 
         if status.startswith("ERROR"):
-            send(status, prefix="eject")
+            send(status, prefix="EJECT")
         else:
             reload()
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
             apply_mount(disk=target)
 
         mpath = target.get_avail_path() or "not_mounted"
-        send(mpath, prefix="mount")
+        send(mpath, prefix="MOUNT")
 
     if args.unmount:
         target_disk = search_instance(disks, args.path[0])
@@ -80,7 +80,7 @@ if __name__ == "__main__":
             apply_unmount(disk=target_disk)
 
         mpath = target_disk.get_avail_path() or "not_mounted"
-        send(mpath, prefix="unmount")
+        send(mpath, prefix="UNMOUNT")
 
     if args.copycheck:
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         elif not src.partition.readonly:
             send("コピー元をROでマウントし直してください。", file=sys.stderr, prefix="ERROR")
         else:
-            send(f"copy", prefix="next")
+            send(f"copy", prefix="NEXT")
 
     if args.copy:
         if len(args.path) != 2:
@@ -126,7 +126,7 @@ if __name__ == "__main__":
             simplebar=True,
         )
 
-        send(f"reorder", prefix="next")
+        send(f"reorder", prefix="NEXT")
 
     if args.reorder:
         target = search_instance(disks, args.path[0]).get_avail_path()
@@ -146,7 +146,7 @@ if __name__ == "__main__":
                 simplebar=True,
             )
 
-        send(f"precheck", prefix="next")
+        send(f"precheck", prefix="NEXT")
 
     if args.precheck:
         target = search_instance(disks, args.path[0]).get_avail_path()
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         if target is not None:
             precheck(src=target, dest=target, dry_run=False, quiet=True, simplebar=True)
 
-        send(f"make_list", prefix="next")
+        send(f"make_list", prefix="NEXT")
 
     if args.make_list:
         target = search_instance(disks, args.path[0]).get_avail_path()
@@ -164,21 +164,21 @@ if __name__ == "__main__":
 
             make_list(src=target, dest=dest)
 
-        send(f"nas", prefix="next")
+        send(f"nas", prefix="NEXT")
 
     if args.nas:
         target = search_instance(disks, args.path[0]).get_avail_path()
 
         if target is not None:
-            nas(
-                src=target,
-                dest=".",  # need to change
+                nas(
+                    src=target,
+                    dest=".",  # need to change
                 config=resources.path("data", "nas_config.json"),  # need to change
-                alias="catalog",  # need to change
-                bucket="preview",  # need to change
-                dry_run=True,
-                quiet=False,
-                simplebar=True,
-            )
+                    alias="catalog",  # need to change
+                    bucket="preview",  # need to change
+                    dry_run=True,
+                    quiet=False,
+                    simplebar=True,
+                )
 
-        send(f"finish", prefix="next")
+        send(f"finish", prefix="NEXT")

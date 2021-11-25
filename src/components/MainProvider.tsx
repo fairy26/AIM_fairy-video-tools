@@ -84,31 +84,31 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     const message = messages.join('');
 
     switch (prefix) {
-      case 'disk':
+      case 'DISK':
         const newDisks = strToArray(removeSingleQuote(message));
         setDisks(newDisks);
         break;
-      case 'mountpoint':
+      case 'MOUNTPOINT':
         const newMountPoints = strToArray(removeSingleQuote(message));
         setMountPoints(newMountPoints);
         break;
-      case 'access':
+      case 'ACCESS':
         const newReadOnlyFlags = strToArray(removeSingleQuote(message)).map(
           (access) => access === 'ro'
         );
         setReadOnlyFlags(newReadOnlyFlags);
         break;
-      case 'mount':
-      case 'unmount':
+      case 'MOUNT':
+      case 'UNMOUNT':
         message.startsWith('ERROR')
           ? handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '))
           : updateOneMountPoint(message);
         break;
-      case 'eject':
+      case 'EJECT':
         message.startsWith('ERROR') &&
           handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '));
         break;
-      case 'next':
+      case 'NEXT':
         handleSteps(messages[0]);
         break;
       default:
