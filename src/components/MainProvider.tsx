@@ -386,23 +386,18 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     ''
   );
 
-  const instError = useMemo(() => !inputOkInReorder(inst), [inst]);
+  const instError = useMemo(() => reorder && !inputOkInReorder(inst), [reorder, inst]);
 
-  const roomError = useMemo(() => !inputOkInReorder(room), [room]);
+  const roomError = useMemo(() => reorder && !inputOkInReorder(room), [reorder, room]);
 
-  const xlsxNameError = useMemo(() => !inputOkInMakelist(xlsxName), [xlsxName]);
+  const xlsxNameError = useMemo(
+    () => makelist && !inputOkInMakelist(xlsxName),
+    [makelist, xlsxName]
+  );
 
   const copyDisable = useMemo(
-    () =>
-      showProgress ||
-      !source ||
-      !destination ||
-      !inst ||
-      !room ||
-      instError ||
-      roomError ||
-      xlsxNameError,
-    [showProgress, source, destination, inst, room, instError, roomError, xlsxNameError]
+    () => showProgress || !source || !destination || instError || roomError || xlsxNameError,
+    [showProgress, source, destination, instError, roomError, xlsxNameError]
   );
 
   const [errorFiles, setErrorFiles] = useState<string[]>([]);
