@@ -350,8 +350,6 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   useEffect(() => {
     if (!reorder) {
       setPrecheck(false);
-      setMakelist(false);
-      setNas(false);
     }
   }, [reorder]);
 
@@ -360,13 +358,11 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
       setReorder(true);
     } else {
       setMakelist(false);
-      setNas(false);
     }
   }, [precheck]);
 
   useEffect(() => {
     if (makelist) {
-      setReorder(true);
       setPrecheck(true);
     } else {
       setNas(false);
@@ -375,8 +371,6 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   useEffect(() => {
     if (nas) {
-      setReorder(true);
-      setPrecheck(true);
       setMakelist(true);
     }
   }, [nas]);
