@@ -121,7 +121,7 @@ if __name__ == "__main__":
             dest=dest.get_avail_path(),
             includes=None,
             excludes=None,
-            dry_run=True,
+            dry_run=False,
             quiet=True,
             simplebar=True,
         )
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 status=None,
                 includes=None,
                 excludes=None,
-                dry_run=True,
+                dry_run=False,
                 quiet=True,
                 simplebar=True,
             )
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         target = search_instance(disks, args.path[0]).get_avail_path()
 
         if target is not None:
-            precheck(src=target, dest=target, dry_run=True, quiet=True, simplebar=True)
+            precheck(src=target, dest=target, dry_run=False, quiet=True, simplebar=True)
 
         send(f"make_list", prefix="NEXT")
 
@@ -176,8 +176,8 @@ if __name__ == "__main__":
                     dest=".",  # need to change
                     config=str(nas_config),  # need to change
                     alias="catalog",  # need to change
-                    bucket="preview",  # need to change
-                    dry_run=True,
+                    bucket="sandbox",  # need to change
+                    dry_run=False,
                     quiet=False,
                     simplebar=True,
                 )
