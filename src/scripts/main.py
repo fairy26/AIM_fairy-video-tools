@@ -173,7 +173,7 @@ if __name__ == "__main__":
             with resources.path("data", "nas_config.json") as nas_config:
                 nas(
                     src=target,
-                    dest=".",  # need to change
+                    dest=args.dest or ".",  # if dest is None, dest="."="fairy-video-tools"
                     config=str(nas_config),  # need to change
                     alias="catalog",  # need to change
                     bucket="sandbox",  # need to change

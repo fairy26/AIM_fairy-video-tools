@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { InputAdornment, ListItem, ListItemIcon, TextField } from '@mui/material';
-import { InsertDriveFile as InsertDriveFileIcon } from '@mui/icons-material';
+import { ListItem, ListItemIcon, TextField } from '@mui/material';
+import { DriveFolderUploadRounded as DriveFolderUploadRoundedIcon } from '@mui/icons-material';
 
 import { useFunctions } from './MainProvider';
 
@@ -9,7 +9,7 @@ type Props = {
   label: string;
 };
 
-export const MakelistOption: React.VFC<Props> = ({ label }) => {
+export const NasOption: React.VFC<Props> = ({ label }) => {
   const { showProgress, xlsxName, setXlsxName, xlsxNameError } = useFunctions();
 
   return (
@@ -18,7 +18,7 @@ export const MakelistOption: React.VFC<Props> = ({ label }) => {
       sx={{ display: 'flex', alignItems: 'flex-start', paddingLeft: 6 }}
     >
       <ListItemIcon sx={{ marginTop: 2 }}>
-        <InsertDriveFileIcon />
+        <DriveFolderUploadRoundedIcon />
       </ListItemIcon>
       <TextField
         required
@@ -29,16 +29,13 @@ export const MakelistOption: React.VFC<Props> = ({ label }) => {
             ? xlsxName
               ? '使えない文字が含まれています'
               : '入力してください'
-            : '※NASフォルダ名と同一になります'
+            : '※Excelファイル名と同一になります'
         }
         variant="standard"
-        id={`outlined-makelist-${label}-required`}
+        id={`outlined-nas-${label}-required`}
         label={label}
         value={xlsxName}
         onChange={setXlsxName}
-        InputProps={{
-          endAdornment: <InputAdornment position="end">.xlsx</InputAdornment>,
-        }}
         fullWidth
         sx={{ paddingRight: 10 }}
       />

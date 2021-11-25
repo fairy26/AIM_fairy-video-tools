@@ -327,7 +327,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [reorder, setReorder] = useState<boolean>(true);
   const [precheck, setPrecheck] = useState<boolean>(true);
   const [makelist, setMakelist] = useState<boolean>(true);
-  const [nas, setNas] = useState<boolean>(false);
+  const [nas, setNas] = useState<boolean>(true);
 
   const toggleReorder = () => {
     setReorder((prev) => !prev);
@@ -430,9 +430,9 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   const handleNas = () => {
     if (nas) {
-      console.log(`R: nas ${destination} -> dest (config bucket)`);
+      console.log(`R: nas ${destination} -> ${xlsxName} (config sandbox)`);
       initRemaining();
-      send(`--nas --path ${destination}`);
+      send(`--nas --path ${destination} --dest ${xlsxName}`);
     } else progressOff();
   };
 

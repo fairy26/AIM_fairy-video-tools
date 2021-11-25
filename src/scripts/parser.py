@@ -22,5 +22,6 @@ def parse() -> argparse.Namespace:
     parser.add_argument("--make_list", action="store_true")
     parser.add_argument("--xlsx", default=None, type=str)
     parser.add_argument("--nas", action="store_true")
+    parser.add_argument("--dest", default=None, type=str)
 
     return parser.parse_args()
