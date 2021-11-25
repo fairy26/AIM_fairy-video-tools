@@ -170,10 +170,11 @@ if __name__ == "__main__":
         target = search_instance(disks, args.path[0]).get_avail_path()
 
         if target is not None:
+            with resources.path("data", "nas_config.json") as nas_config:
                 nas(
                     src=target,
                     dest=".",  # need to change
-                config=resources.path("data", "nas_config.json"),  # need to change
+                    config=str(nas_config),  # need to change
                     alias="catalog",  # need to change
                     bucket="preview",  # need to change
                     dry_run=True,
