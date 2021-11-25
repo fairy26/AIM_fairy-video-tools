@@ -1,56 +1,31 @@
-import argparse
 import json
 import sys
 from importlib import resources
+from pathlib import PurePosixPath
 from logging import config
 
-import pyudev
 from exitstatus import ExitStatus
 
+from parser import parse
+from monitor import monitoring
 from eject import eject
 from mount import mount
 from utils import (
     apply_format,
     apply_mount,
-    get_access_list,
-    get_disk_list,
+    apply_unmount,
     get_located_disks,
-    get_mountpoint_list,
+    reload,
     search_instance,
+    send,
 )
 from unmount import unmount
 from format import run as format
 from diskcopy import run as diskcopy
-
-
-def send(message, file=sys.stdout, prefix=None):
-    if prefix:
-        message = f"{prefix} {message}"
-    print(message, file=file)
-    file.flush()
-
-
-def reload():
-    disks = get_located_disks()
-    send(get_disk_list(disks), prefix="disk")
-    send(get_mountpoint_list(disks), prefix="mountpoint")
-    send(get_access_list(disks), prefix="access")
-
-
-def monitoring():
-
-    context = pyudev.Context()
-    monitor = pyudev.Monitor.from_netlink(context)
-
-    try:
-        monitor.start()
-
-        for device in iter(monitor.poll, None):
-            if device.device_type in {"disk", "partition"}:
-                reload()
-
-    except KeyboardInterrupt:
-        sys.exit(ExitStatus.success)
+from reorder import run as reorder
+from precheck import run as precheck
+from make_list import run as make_list
+from nas import run as nas
 
 
 if __name__ == "__main__":
@@ -60,19 +35,7 @@ if __name__ == "__main__":
     #   args = [sys.executable] + argv
     #   os.execlp('sudo', *args)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--quiet", default=False, action=argparse.BooleanOptionalAction, help="quiet mode")
-    parser.add_argument("--path", default=None, action="extend", nargs="+", type=str)
-    parser.add_argument("--mount", action="store_true")
-    parser.add_argument("--ro", "--read-only", action="store_true")
-    parser.add_argument("--unmount", action="store_true")
-    parser.add_argument("--check", action="store_true")
-    parser.add_argument("--copycheck", action="store_true")
-    parser.add_argument("--copy", action="store_true")
-    parser.add_argument("--format", action="store_true")
-    parser.add_argument("--eject", action="store_true")
-    parser.add_argument("--monitor", action="store_true")
-    args = parser.parse_args()
+    args = parse()
 
     with resources.path("data", "log_config.json") as log_config:
         with open(log_config, encoding="utf-8") as f:
@@ -86,12 +49,15 @@ if __name__ == "__main__":
     if args.monitor:
         monitoring()
 
+    if args.check:
+        reload()
+
     if args.eject:
         target = search_instance(disks, args.path[0])
         status = eject(target.path)
 
         if status.startswith("ERROR"):
-            send(status, prefix="eject")
+            send(status, prefix="EJECT")
         else:
             reload()
 
@@ -103,14 +69,18 @@ if __name__ == "__main__":
             apply_mount(disk=target)
 
         mpath = target.get_avail_path() or "not_mounted"
-        send(mpath, prefix="mount")
+        send(f"{target.position} {mpath}", prefix="MOUNT")
 
     if args.unmount:
-        status = unmount(args.path[0])
-        send(status, prefix="unmount")
+        target_disk = search_instance(disks, args.path[0])
+        target = target_disk.get_avail_path()
 
-    if args.check:
-        reload()
+        if target is not None:
+            unmount(mountpoint=target)
+            apply_unmount(disk=target_disk)
+
+        mpath = target_disk.get_avail_path() or "not_mounted"
+        send(f"{target_disk.position} {mpath}", prefix="UNMOUNT")
 
     if args.copycheck:
 
@@ -128,11 +98,10 @@ if __name__ == "__main__":
         elif not src.partition.readonly:
             send("コピー元をROでマウントし直してください。", file=sys.stderr, prefix="ERROR")
         else:
-            send(f"OK {args.path[0]} {args.path[1]}", prefix="copy")
+            send(f"copy", prefix="NEXT")
 
     if args.copy:
         if len(args.path) != 2:
-            # TODO: inform error to app
             sys.exit(ExitStatus.failure)
 
         src = search_instance(disks, args.path[0])
@@ -157,4 +126,60 @@ if __name__ == "__main__":
             simplebar=True,
         )
 
-        send("COMPLETED", prefix="copy")
+        send(f"reorder", prefix="NEXT")
+
+    if args.reorder:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+
+        if target is not None:
+            reorder(
+                src=target,
+                dest=target,
+                operation="move",
+                new_institution=args.inst,
+                new_room=args.room,
+                status=None,
+                includes=None,
+                excludes=None,
+                dry_run=False,
+                quiet=True,
+                simplebar=True,
+            )
+
+        send(f"precheck", prefix="NEXT")
+
+    if args.precheck:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+
+        if target is not None:
+            precheck(src=target, dest=target, dry_run=False, quiet=True, simplebar=True)
+
+        send(f"make_list", prefix="NEXT")
+
+    if args.make_list:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+
+        if target is not None:
+            dest = str(PurePosixPath(target).joinpath(args.xlsx))
+
+            make_list(src=target, dest=dest)
+
+        send(f"nas", prefix="NEXT")
+
+    if args.nas:
+        target = search_instance(disks, args.path[0]).get_avail_path()
+
+        if target is not None:
+            with resources.path("data", "nas_config.json") as nas_config:
+                nas(
+                    src=target,
+                    dest=args.dest or ".",  # if dest is None, dest="."="fairy-video-tools"
+                    config=str(nas_config),  # need to change
+                    alias="catalog",  # need to change
+                    bucket="sandbox",  # need to change
+                    dry_run=False,
+                    quiet=False,
+                    simplebar=True,
+                )
+
+        send(f"finish", prefix="NEXT")

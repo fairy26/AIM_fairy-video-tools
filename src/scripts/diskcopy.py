@@ -96,7 +96,7 @@ def diskcopy(src, dest, includes=None, excludes=None, dry_run=True, quiet=False,
                         if dest_path.exists():
                             os.remove(dest_path)
                         logger.error(f"(cancel) {src_path}")
-                        break
+                        sys.exit(ExitStatus.failure)
                     if ret == 0:
                         pbar.update(node.size)
                         logger.info(f"(copy) {src_path}")

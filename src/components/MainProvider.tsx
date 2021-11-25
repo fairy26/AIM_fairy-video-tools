@@ -1,4 +1,12 @@
-import React, { createContext, useState, useContext, useCallback, useEffect, useMemo } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react';
 
 import { ContextBridgeApi } from '../preload';
 
@@ -8,8 +16,8 @@ export const useFunctions = () => useContext(MainCtx);
 const strToArray = (str: string): string[] => str.slice(1, -1).split(',');
 const removeSingleQuote = (str: string): string => str.replace(/'/g, '');
 const divmod = (x: number, y: number): number[] => [Math.floor(x / y), x % y];
-
-let index: number = 0;
+const inputOkInReorder = (str: string): boolean => /^[\w]+$/.test(str);
+const inputOkInMakelist = (str: string): boolean => /^[\w-]+$/.test(str);
 
 // @ts-ignore
 const api: ContextBridgeApi = window.api;
@@ -19,17 +27,22 @@ const send = async (arg: string) => {
 };
 
 export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
+  const [stdout, setStdout] = useReducer((_: string, arg: string) => arg, '');
+  const [stderr, setStderr] = useReducer((_: string, arg: string) => arg, '');
+
   useEffect(() => {
     console.log('R: only one after initial render');
 
-    api.onSendToRenderer(handleStdout);
-    api.onSendToRendererInRealTime(handleStderr);
+    api.onSendToRenderer(setStdout);
+    api.onSendToRendererInRealTime(setStderr);
 
     send('--monitor');
     send('--check');
 
     return api.removeOnSendToRenderers;
   }, []);
+
+  // disk management ---------------------------------------------------------
 
   const [disks, setDisks] = useState<string[]>(Array(10).fill('empty'));
   const [mountPoints, setMountPoints] = useState<string[]>(Array(10).fill('empty'));
@@ -58,56 +71,80 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
       ]);
     };
 
-  const updateOneMountPoint = (mountPoint: string): void => {
+  const updateOneMountPoint = (index: number, mountPoint: string): void => {
     setMountPoints((prev) => [...prev.map((element, i) => (i === index ? mountPoint : element))]);
   };
 
-  const handleStdout = (arg: string): void => {
-    console.log(arg);
-    const [prefix, ...messages] = arg.split(' ');
+  useEffect(() => {
+    if (!stdout) return;
+
+    const [prefix, ...messages] = stdout.split(' ');
     const message = messages.join('');
 
     switch (prefix) {
-      case 'disk':
+      case 'DISK':
         const newDisks = strToArray(removeSingleQuote(message));
         setDisks(newDisks);
         break;
-      case 'mountpoint':
+      case 'MOUNTPOINT':
         const newMountPoints = strToArray(removeSingleQuote(message));
         setMountPoints(newMountPoints);
         break;
-      case 'access':
+      case 'ACCESS':
         const newReadOnlyFlags = strToArray(removeSingleQuote(message)).map(
           (access) => access === 'ro'
         );
         setReadOnlyFlags(newReadOnlyFlags);
         break;
-      case 'mount':
-      case 'unmount':
+      case 'MOUNT':
+      case 'UNMOUNT':
         message.startsWith('ERROR')
           ? handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '))
-          : updateOneMountPoint(message);
+          : updateOneMountPoint(Number(messages[0]) - 1, messages[1]);
         break;
-      case 'eject':
+      case 'EJECT':
         message.startsWith('ERROR') &&
           handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '));
         break;
-      case 'copy':
-        messages[0] === 'OK' && handleCopy(messages[1], messages[2]);
-        messages[0] === 'COMPLETED' && progressOff();
+      case 'NEXT':
+        handleSteps(messages[0]);
         break;
       default:
-        setLogs((prev) => [...prev, arg]);
+        setLogs((prev) => [...prev, stdout]);
+        break;
+    }
+
+    // setStdout('');
+  }, [stdout]);
+
+  const handleSteps = (step: string) => {
+    switch (step) {
+      case 'copy':
+        handleCopy();
+        break;
+      case 'reorder':
+        handleReorder();
+        break;
+      case 'precheck':
+        handlePrecheck();
+        break;
+      case 'make_list':
+        handleMakelist();
+        break;
+      case 'nas':
+        handleNas();
+        break;
+      default:
+        progressOff();
         break;
     }
   };
 
-  const handleMount = (newIndex: number) => (): void => {
-    console.log('R: clicked, change mount states' + newIndex);
+  const handleMount = (index: number) => (): void => {
+    console.log(`R: clicked, change mount states ${index}:${disks[index]}`);
 
-    index = newIndex;
     mounted[index]
-      ? send(`--unmount --path ${mountPoints[index]}`)
+      ? send(`--unmount --path ${disks[index]}`)
       : readOnlyFlags[index]
       ? send(`--mount --read-only --path ${disks[index]}`)
       : send(`--mount --path ${disks[index]}`);
@@ -128,7 +165,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     []
   );
 
-  // --------------------------------------------------------------
+  // disk copy --------------------------------------------------------------
 
   const [source, setSource] = useState<string | null>(null);
   const handleSourceChange = (event: React.ChangeEvent<HTMLInputElement>, newValue: string) => {
@@ -170,36 +207,55 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const [logs, setLogs] = useState<string[]>([]);
 
   const progressOn = useCallback((): void => {
+    setOptionOpen(false);
     setLogs([]);
+    setErrorFiles([]);
     setShowProgress(true);
+    setPyError('');
   }, []);
 
-  const progressOff = useCallback((): void => {
+  const progressOff = useCallback((onlyPbar: boolean = false): void => {
     setShowProgress(false);
+    initRemaining();
+    if (!onlyPbar) {
+      setOptionOpen(true);
+      setSource(null);
+      setDestination(null);
+    }
+  }, []);
+
+  const initRemaining = useCallback((): void => {
     setPercentage(0);
     setRemaining('');
     setEndTime('');
-    setSource(null);
-    setDestination(null);
   }, []);
 
-  const handleStderr = (arg: string): void => {
-    console.log(arg);
+  useEffect(() => {
+    if (!stderr) return;
 
-    const [prefix, ...messages] = arg.split(' ');
+    const [prefix, ...messages] = stderr.split(' ');
+    const message = messages.join(' ');
 
     switch (prefix) {
       case 'ALERT':
-        setAlertDialogContent(messages.join(' '));
+        setAlertDialogContent(message);
         break;
       case 'ERROR':
-        handleSnackbarOpen(messages.join(' '));
+        handleSnackbarOpen(message);
+        break;
+      case 'FILEERROR':
+        setErrorFiles((prev) => [...prev, message]);
+        break;
+      case 'PYERROR':
+        progressOff();
+        setPyError((prev) => `${prev}${message}\n`);
         break;
       default:
-        updateProgress(arg);
+        updateProgress(stderr);
         break;
     }
-  };
+    setStderr('');
+  }, [stderr]);
 
   const formatInterval = (t: number): string => {
     const [mins, s] = divmod(t, 60);
@@ -242,28 +298,22 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     }
   };
 
-  const handleCopy = useCallback((src: string, dest: string) => {
-    console.log(`R: clicked, copy ${src} -> ${dest}`);
+  const handleCopy = (format: boolean = false): void => {
+    console.log(
+      `R: ${format && `clicked, format ${destination} & `}copy ${source} -> ${destination}`
+    );
 
-    send(`--copy --path ${src} ${dest}`);
+    format
+      ? send(`--copy --format --path ${source} ${destination}`)
+      : send(`--copy --path ${source} ${destination}`);
     progressOn();
-  }, []);
+  };
 
-  const handleCopyFormat = useCallback((src: string, dest: string) => {
-    console.log(`R: clicked, format ${dest} & copy ${src} -> ${dest}`);
+  const handleCopycheck = (): void => {
+    console.log(`R: clicked, copycheck ${source}, ${destination}`);
 
-    send(`--copy --format --path ${src} ${dest}`);
-    progressOn();
-  }, []);
-
-  const handleCopycheck = useCallback(
-    (src: string, dest: string) => (): void => {
-      console.log(`R: copycheck ${src}, ${dest}`);
-
-      send(`--copycheck --path ${src} ${dest}`);
-    },
-    []
-  );
+    send(`--copycheck --path ${source} ${destination}`);
+  };
 
   const killBySIGINT = useCallback((): void => {
     console.log('R: clicked, raise keyboard interrupt');
@@ -273,6 +323,123 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   }, []);
 
   const [alertDialogContent, setAlertDialogContent] = useState<string>('');
+
+  // precheck --------------------------------------------------------------
+  const [optionsOpen, setOptionOpen] = useState<boolean>(true);
+
+  const toggleOptionsOpen = () => setOptionOpen((prev) => !prev);
+
+  const [reorder, setReorder] = useState<boolean>(true);
+  const [precheck, setPrecheck] = useState<boolean>(true);
+  const [makelist, setMakelist] = useState<boolean>(true);
+  const [nas, setNas] = useState<boolean>(true);
+
+  const toggleReorder = () => {
+    setReorder((prev) => !prev);
+  };
+
+  const togglePrecheck = () => {
+    setPrecheck((prev) => !prev);
+  };
+
+  const toggleMakelist = () => {
+    setMakelist((prev) => !prev);
+  };
+
+  const toggleNas = () => {
+    setNas((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (!reorder) {
+      setPrecheck(false);
+    }
+  }, [reorder]);
+
+  useEffect(() => {
+    if (precheck) {
+      setReorder(true);
+    } else {
+      setMakelist(false);
+    }
+  }, [precheck]);
+
+  useEffect(() => {
+    if (makelist) {
+      setPrecheck(true);
+    } else {
+      setNas(false);
+    }
+  }, [makelist]);
+
+  useEffect(() => {
+    if (nas) {
+      setMakelist(true);
+    }
+  }, [nas]);
+
+  const [inst, setInst] = useReducer(
+    (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
+    ''
+  );
+  const [room, setRoom] = useReducer(
+    (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
+    ''
+  );
+  const [xlsxName, setXlsxName] = useReducer(
+    (_: string, event: React.ChangeEvent<HTMLInputElement>) => event.target.value,
+    ''
+  );
+
+  const instError = useMemo(() => reorder && !inputOkInReorder(inst), [reorder, inst]);
+
+  const roomError = useMemo(() => reorder && !inputOkInReorder(room), [reorder, room]);
+
+  const xlsxNameError = useMemo(
+    () => makelist && !inputOkInMakelist(xlsxName),
+    [makelist, xlsxName]
+  );
+
+  const copyDisable = useMemo(
+    () => showProgress || !source || !destination || instError || roomError || xlsxNameError,
+    [showProgress, source, destination, instError, roomError, xlsxNameError]
+  );
+
+  const [errorFiles, setErrorFiles] = useState<string[]>([]);
+
+  const [pyError, setPyError] = useState<string>('');
+
+  const handleReorder = () => {
+    if (reorder) {
+      console.log(`R: reorder ${destination} (institution=${inst}, room=${room})`);
+      initRemaining();
+      send(`--reorder --path ${destination} --inst ${inst} --room ${room}`);
+    } else progressOff();
+  };
+
+  const handlePrecheck = () => {
+    if (precheck) {
+      console.log(`R: precheck ${destination}`);
+      initRemaining();
+      send(`--precheck --path ${destination}`);
+    } else progressOff();
+  };
+
+  const handleMakelist = () => {
+    if (makelist) {
+      console.log(`R: make_list ${xlsxName}.xlsx in ${destination}`);
+      initRemaining();
+      send(`--make_list --path ${destination} --xlsx ${xlsxName + '.xlsx'}`);
+    } else progressOff();
+  };
+
+  const handleNas = () => {
+    if (nas) {
+      console.log(`R: nas ${destination} -> ${xlsxName} (config sandbox)`);
+      initRemaining();
+      send(`--nas --path ${destination} --dest ${xlsxName}`);
+    } else progressOff();
+  };
 
   return (
     <MainCtx.Provider
@@ -299,12 +466,34 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         destination,
         destinations,
         handleDestinationChange,
+        handleCopy,
         handleCopycheck,
         logs,
         alertDialogContent,
         setAlertDialogContent,
         progressOff,
-        handleCopyFormat,
+        reorder,
+        toggleReorder,
+        precheck,
+        togglePrecheck,
+        makelist,
+        toggleMakelist,
+        nas,
+        toggleNas,
+        inst,
+        setInst,
+        room,
+        setRoom,
+        xlsxName,
+        setXlsxName,
+        copyDisable,
+        instError,
+        roomError,
+        xlsxNameError,
+        errorFiles,
+        optionsOpen,
+        toggleOptionsOpen,
+        pyError,
       }}
     >
       {children}

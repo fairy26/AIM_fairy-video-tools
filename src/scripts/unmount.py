@@ -4,12 +4,14 @@ import sys
 
 from exitstatus import ExitStatus
 
+from utils import send
+
 
 def _add_permission(cmd):
     cmd.insert(0, "sudo")
 
 
-def unmount(disk):
+def unmount(mountpoint):
 
     authorized = True  # False: add 'sudo' to command
     if os.geteuid():
@@ -17,10 +19,10 @@ def unmount(disk):
         # os.execlp('sudo', *args)
         authorized = False
 
-    if not os.path.exists(disk):
-        sys.exit(-1)
+    if not os.path.exists(mountpoint):
+        sys.exit(ExitStatus.failure)
 
-    realpath = os.path.realpath(disk)
+    realpath = os.path.realpath(mountpoint)
 
     target = realpath
     with open("/proc/mounts", "r", encoding="utf-8") as f:
@@ -36,7 +38,7 @@ def unmount(disk):
                     subprocess.run(cmd, check=True)
                 except subprocess.CalledProcessError as e:
                     if e.returncode == 32:
-                        return "ERROR target is busy."
+                        send("ERROR target is busy.", prefix="unmount")
                     sys.exit(ExitStatus.failure)
                 if os.path.exists(target):
                     # os.rmdir(target)
@@ -45,5 +47,3 @@ def unmount(disk):
                         _add_permission(cmd_rmdir)
                     subprocess.run(cmd_rmdir)
                 target = device_name
-
-    return "not_mounted"

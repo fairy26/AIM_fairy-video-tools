@@ -1,0 +1,13 @@
+{
+    "aliases": {
+        "catalog": {
+            "url": "http://catalog-minio.dev.ai-ms.com/",
+            "accessKey": "XDZ5WW1855D60ULOQ01G",
+            "secretKey": "PZhInpPR58R8lfR+UUKJUHarRBR+L36U+gSiJx+g",
+            "expiration": "2022-08-24T12:36:09Z",
+            "sessionToken": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJYRFo1V1cxODU1RDYwVUxPUTAxRyIsImV4cCI6MTY2MTM0NDU2OSwibGRhcFVzZXIiOiJ1aWQ9eWthdG8sY249dXNlcnMsY249YWNjb3VudHMsZGM9ZGV2LGRjPWFpLW1zLGRjPWNvbSIsImxkYXBVc2VybmFtZSI6InlrYXRvIn0.9hLJePDQ8-SM2weVZtMj62adZdW6brj4J_cOHVNp9yYnYCtYPoVfF6gP45S0U4xjRGUeFE-QI96FwfuTvOogcA",
+            "api": "s3v4",
+            "path": "auto"
+        }
+    }
+}

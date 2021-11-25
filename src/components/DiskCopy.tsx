@@ -7,7 +7,8 @@ import { AlertSnackbar } from './AlertSnackbar';
 import { AlertDialog } from './AlertDialog';
 import { CopyTargetSelect } from './CopyTargetSelect';
 import { GriddedPbar } from './GriddedPbar';
-import { Logger } from './Logger';
+import { PreOptions } from './PreOptions';
+import { OutputTabs } from './OutputTabs';
 
 export const DiskCopy: React.FC = () => {
   const {
@@ -19,14 +20,11 @@ export const DiskCopy: React.FC = () => {
     destinations,
     handleDestinationChange,
     handleCopycheck,
+    copyDisable,
   } = useFunctions();
 
   const HandleCopyButton = () => (
-    <Button
-      variant="outlined"
-      onClick={handleCopycheck(source, destination)}
-      disabled={showProgress || source == null || destination == null}
-    >
+    <Button variant="outlined" onClick={handleCopycheck} disabled={copyDisable} size="large">
       実行
     </Button>
   );
@@ -61,16 +59,20 @@ export const DiskCopy: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Grid item xs={12}>
+          <PreOptions />
+        </Grid>
+
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <HandleCopyButton />
         </Grid>
 
         <GriddedPbar />
       </Grid>
 
-      <Logger />
+      <OutputTabs />
 
-      <AlertDialog {...{ source, destination }} />
+      <AlertDialog />
       <AlertSnackbar />
     </>
   );

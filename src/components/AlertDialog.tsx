@@ -3,14 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 import { useFunctions } from './MainProvider';
 
-type Props = {
-  source: string;
-  destination: string;
-};
-
-export const AlertDialog: React.VFC<Props> = ({ source, destination }) => {
-  const { alertDialogContent, setAlertDialogContent, handleCopyFormat, progressOff } =
-    useFunctions();
+export const AlertDialog: React.VFC = () => {
+  const { alertDialogContent, setAlertDialogContent, handleCopy, progressOff } = useFunctions();
 
   const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false);
 
@@ -20,12 +14,12 @@ export const AlertDialog: React.VFC<Props> = ({ source, destination }) => {
   };
 
   const handleAgree = () => {
-    handleCopyFormat(source, destination);
+    handleCopy(true);
     handleAlertDialogClose();
   };
 
   const handleDisagree = () => {
-    progressOff();
+    progressOff(true);
     handleAlertDialogClose();
   };
 

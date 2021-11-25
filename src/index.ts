@@ -124,7 +124,7 @@ const getScriptPath = () => {
 const killChildProcesses = (signal?: string, excludePID?: number | null) => {
   childProcesses.forEach((cprocess, index) => {
     if (excludePID && cprocess.pid === excludePID) return;
-    console.log(`kill ${cprocess.pid}(${cprocess.exitCode})`);
+    console.log(`kill ${cprocess.pid} (${cprocess.exitCode})`);
     try {
       signal ? process.kill(-cprocess.pid, signal) : process.kill(-cprocess.pid);
     } catch (e) {
@@ -160,9 +160,7 @@ const execPython = (window: BrowserWindow, message: any): void => {
     });
 
     pyps.on('close', (code: number, signal: string) => {
-      console.log('The exit code was: ' + code);
-      console.log('The exit signal was: ' + signal);
-      console.log('finished');
+      console.log(`finished (exit code:${code} exit signal:${signal})`);
 
       childProcesses.forEach((cprocess, index) => {
         cprocess.pid === pyps.pid && childProcesses.splice(index, 1);
@@ -170,13 +168,12 @@ const execPython = (window: BrowserWindow, message: any): void => {
     });
 
     pyps.on('error', (err: Error) => {
-      throw err;
+      window.webContents.send(IpcChannelType.TO_RENDERER_STDERR, `PYERROR ${err.message}`);
     });
   } else {
     const options = {
       args: args,
-      // pythonPath: '/home/fairy26/Documents/venv39/bin/python',
-      pythonPath: '/home/fairy26/ドキュメント/venv39/bin/python',
+      pythonPath: '/home/fairy26/ドキュメント/venv39/bin/python', // need to change
       detached: true,
     };
 
@@ -193,11 +190,10 @@ const execPython = (window: BrowserWindow, message: any): void => {
         window.webContents.send(IpcChannelType.TO_RENDERER_STDERR, stderr);
       })
       .end((err, code, signal) => {
-        if (err) throw err;
+        if (err)
+          window.webContents.send(IpcChannelType.TO_RENDERER_STDERR, `PYERROR ${err.message}`);
 
-        console.log('The exit code was: ' + code);
-        console.log('The exit signal was: ' + signal);
-        console.log('finished');
+        console.log(`finished (exit code:${code} exit signal:${signal})`);
 
         childProcesses.forEach((cprocess, index) => {
           cprocess.pid === pyshell.childProcess.pid && childProcesses.splice(index, 1);
