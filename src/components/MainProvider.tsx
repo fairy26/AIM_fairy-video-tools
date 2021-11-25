@@ -115,8 +115,6 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         setLogs((prev) => [...prev, stdout]);
         break;
     }
-
-    setStdout('');
   }, [stdout]);
 
   const handleSteps = (step: string) => {
@@ -212,8 +210,9 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
   const progressOn = useCallback((): void => {
     setOptionOpen(false);
     setLogs([]);
-    setReorderErrorFiles([]);
+    setErrorFiles([]);
     setShowProgress(true);
+    setPyError('');
   }, []);
 
   const progressOff = useCallback((): void => {
@@ -244,14 +243,16 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         handleSnackbarOpen(message);
         break;
       case 'FILEERROR':
-        setReorderErrorFiles((prev) => [...prev, message]);
+        setErrorFiles((prev) => [...prev, message]);
+        break;
+      case 'PYERROR':
+        progressOff();
+        setPyError((prev) => `${prev}${message}\n`);
         break;
       default:
         updateProgress(stderr);
         break;
     }
-
-    setStderr('');
   }, [stderr]);
 
   const formatInterval = (t: number): string => {
@@ -407,7 +408,9 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     [showProgress, source, destination, inst, room, instError, roomError, xlsxNameError]
   );
 
-  const [reorderErrorFiles, setReorderErrorFiles] = useState<string[]>([]);
+  const [errorFiles, setErrorFiles] = useState<string[]>([]);
+
+  const [pyError, setPyError] = useState<string>('');
 
   const handleReorder = () => {
     if (reorder) {
@@ -490,9 +493,10 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         instError,
         roomError,
         xlsxNameError,
-        reorderErrorFiles,
+        errorFiles,
         optionsOpen,
         toggleOptionsOpen,
+        pyError,
       }}
     >
       {children}

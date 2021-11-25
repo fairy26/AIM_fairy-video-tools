@@ -8,15 +8,15 @@ import { Logger } from './Logger';
 import { useFunctions } from './MainProvider';
 
 export const OutputTabs: React.FC = () => {
-  const { logs, reorderErrorFiles } = useFunctions();
+  const { logs, errorFiles, pyError } = useFunctions();
 
   const [tabValue, setTabValue] = useState<string>('1');
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
   };
 
-  if (reorderErrorFiles.length) {
-    return (
+  return (
+    <Box sx={{ display: !logs.length && 'none' }}>
       <TabContext value={tabValue}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={handleTabChange}>
@@ -30,20 +30,19 @@ export const OutputTabs: React.FC = () => {
           </Paper>
         </TabPanel>
         <TabPanel value="2">
-          <Alert severity="warning">
+          <Alert
+            severity="warning"
+            sx={{ mb: pyError && 3, display: !errorFiles.length && 'none' }}
+          >
             <AlertTitle>名前が適切でない動画が検出されました</AlertTitle>
-            <Logger contents={reorderErrorFiles} />
+            <Logger contents={errorFiles} />
+          </Alert>
+          <Alert severity="error" sx={{ display: pyError === '' && 'none' }}>
+            <AlertTitle>内部処理でエラーが発生しました</AlertTitle>
+            {pyError}
           </Alert>
         </TabPanel>
       </TabContext>
-    );
-  } else if (logs.length) {
-    return (
-      <Paper variant="outlined" sx={{ margin: 3 }}>
-        <Logger contents={logs} />
-      </Paper>
-    );
-  } else {
-    return <></>;
-  }
+    </Box>
+  );
 };
