@@ -19,7 +19,7 @@ export const AlertDialog: React.VFC = () => {
   };
 
   const handleDisagree = () => {
-    progressOff();
+    progressOff(true);
     handleAlertDialogClose();
   };
 

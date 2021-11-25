@@ -18,7 +18,13 @@ export const OutputTabs: React.FC = () => {
   return (
     <Box sx={{ display: !logs.length && 'none' }}>
       <TabContext value={tabValue}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            display: (!errorFiles.length || !pyError) && 'none',
+          }}
+        >
           <TabList onChange={handleTabChange}>
             <Tab icon={<SubjectIcon />} value="1" />
             <Tab icon={<ErrorOutlineIcon />} value="2" />
@@ -37,7 +43,7 @@ export const OutputTabs: React.FC = () => {
             <AlertTitle>名前が適切でない動画が検出されました</AlertTitle>
             <Logger contents={errorFiles} />
           </Alert>
-          <Alert severity="error" sx={{ display: pyError === '' && 'none' }}>
+          <Alert severity="error" sx={{ display: !pyError && 'none' }}>
             <AlertTitle>内部処理でエラーが発生しました</AlertTitle>
             {pyError}
           </Alert>

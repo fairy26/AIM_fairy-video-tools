@@ -113,6 +113,8 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         setLogs((prev) => [...prev, stdout]);
         break;
     }
+
+    // setStdout('');
   }, [stdout]);
 
   const handleSteps = (step: string) => {
@@ -212,12 +214,14 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     setPyError('');
   }, []);
 
-  const progressOff = useCallback((): void => {
-    setOptionOpen(true);
+  const progressOff = useCallback((onlyPbar: boolean = false): void => {
     setShowProgress(false);
     initRemaining();
-    setSource(null);
-    setDestination(null);
+    if (!onlyPbar) {
+      setOptionOpen(true);
+      setSource(null);
+      setDestination(null);
+    }
   }, []);
 
   const initRemaining = useCallback((): void => {
@@ -250,6 +254,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
         updateProgress(stderr);
         break;
     }
+    setStderr('');
   }, [stderr]);
 
   const formatInterval = (t: number): string => {
@@ -295,7 +300,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
 
   const handleCopy = (format: boolean = false): void => {
     console.log(
-      `R: ${format ? `clicked, format ${destination} & ` : ''}copy ${source} -> ${destination}`
+      `R: ${format && `clicked, format ${destination} & `}copy ${source} -> ${destination}`
     );
 
     format
