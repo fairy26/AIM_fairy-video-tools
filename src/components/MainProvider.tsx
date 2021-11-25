@@ -19,8 +19,6 @@ const divmod = (x: number, y: number): number[] => [Math.floor(x / y), x % y];
 const inputOkInReorder = (str: string): boolean => /^[\w]+$/.test(str);
 const inputOkInMakelist = (str: string): boolean => /^[\w-]+$/.test(str);
 
-let index: number = 0;
-
 // @ts-ignore
 const api: ContextBridgeApi = window.api;
 const send = async (arg: string) => {
@@ -73,7 +71,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
       ]);
     };
 
-  const updateOneMountPoint = (mountPoint: string): void => {
+  const updateOneMountPoint = (index: number, mountPoint: string): void => {
     setMountPoints((prev) => [...prev.map((element, i) => (i === index ? mountPoint : element))]);
   };
 
@@ -102,7 +100,7 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
       case 'UNMOUNT':
         message.startsWith('ERROR')
           ? handleSnackbarOpen(messages.filter((_, i) => i != 0).join(' '))
-          : updateOneMountPoint(message);
+          : updateOneMountPoint(Number(messages[0]) - 1, messages[1]);
         break;
       case 'EJECT':
         message.startsWith('ERROR') &&
@@ -140,10 +138,9 @@ export const MainProvider: React.FC<React.ReactNode> = ({ children }: any) => {
     }
   };
 
-  const handleMount = (newIndex: number) => (): void => {
-    console.log(`R: clicked, change mount states ${newIndex}:${disks[newIndex]}`);
+  const handleMount = (index: number) => (): void => {
+    console.log(`R: clicked, change mount states ${index}:${disks[index]}`);
 
-    index = newIndex;
     mounted[index]
       ? send(`--unmount --path ${disks[index]}`)
       : readOnlyFlags[index]

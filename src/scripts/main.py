@@ -69,7 +69,7 @@ if __name__ == "__main__":
             apply_mount(disk=target)
 
         mpath = target.get_avail_path() or "not_mounted"
-        send(mpath, prefix="MOUNT")
+        send(f"{target.position} {mpath}", prefix="MOUNT")
 
     if args.unmount:
         target_disk = search_instance(disks, args.path[0])
@@ -80,7 +80,7 @@ if __name__ == "__main__":
             apply_unmount(disk=target_disk)
 
         mpath = target_disk.get_avail_path() or "not_mounted"
-        send(mpath, prefix="UNMOUNT")
+        send(f"{target_disk.position} {mpath}", prefix="UNMOUNT")
 
     if args.copycheck:
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
             dest=dest.get_avail_path(),
             includes=None,
             excludes=None,
-            dry_run=False,
+            dry_run=True,
             quiet=True,
             simplebar=True,
         )
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 status=None,
                 includes=None,
                 excludes=None,
-                dry_run=False,
+                dry_run=True,
                 quiet=True,
                 simplebar=True,
             )
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         target = search_instance(disks, args.path[0]).get_avail_path()
 
         if target is not None:
-            precheck(src=target, dest=target, dry_run=False, quiet=True, simplebar=True)
+            precheck(src=target, dest=target, dry_run=True, quiet=True, simplebar=True)
 
         send(f"make_list", prefix="NEXT")
 
